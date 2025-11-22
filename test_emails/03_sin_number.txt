@@ -1,0 +1,18 @@
+From: employee@company.com
+To: hr@company.com
+Subject: Tax Information Request
+
+Hi HR Team,
+
+I need to update my tax information. Please find my details below:
+
+Full Name: Sarah Johnson
+Employee ID: EMP-12345
+Social Insurance Number: 123-456-789
+Date of Birth: 1990-05-15
+
+Please let me know if you need any additional information.
+
+Thanks,
+Sarah Johnson
+

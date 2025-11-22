@@ -1,0 +1,18 @@
+From: customer@example.com
+To: support@company.com
+Subject: Payment Issue - Need Help
+
+Hello Support Team,
+
+I'm having trouble processing a payment with my credit card.
+
+Card Details:
+Card Number: 4532-1234-5678-9010
+Expiry: 12/25
+Name: John Customer
+
+The transaction keeps getting declined. Can you please help me resolve this issue?
+
+Thank you,
+John Customer
+

@@ -1,0 +1,19 @@
+From: applicant@example.com
+To: hiring@company.com
+Subject: Job Application - Personal Information
+
+Dear Hiring Manager,
+
+I am submitting my application for the Software Engineer position. Below are my details:
+
+Name: Michael Brown
+Email: michael.brown@email.com
+Phone: (555) 123-4567
+Social Security Number: 123-45-6789
+Address: 123 Main Street, City, State 12345
+
+I have attached my resume and cover letter for your review.
+
+Best regards,
+Michael Brown
+

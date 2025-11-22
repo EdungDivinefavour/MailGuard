@@ -1,0 +1,19 @@
+From: john.doe@company.com
+To: jane.smith@company.com
+Subject: Weekly Team Meeting Reminder
+
+Hi Jane,
+
+This is a reminder about our weekly team meeting scheduled for Friday at 2:00 PM.
+
+Agenda:
+- Project status updates
+- Q4 planning discussion
+- Resource allocation review
+
+Please prepare your status report and bring any questions you have.
+
+Best regards,
+John Doe
+Project Manager
+

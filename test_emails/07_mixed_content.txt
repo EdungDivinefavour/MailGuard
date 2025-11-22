@@ -1,0 +1,22 @@
+From: manager@company.com
+To: team@company.com
+Subject: Project Update and Reminders
+
+Hi Team,
+
+Quick update on the project:
+
+1. Status: On track for Q4 delivery
+2. Budget: Within allocated limits
+3. Team: All members performing well
+
+Reminders:
+- Submit timesheets by Friday
+- Team meeting next Monday at 10 AM
+- Client contact: client.manager@external.com
+
+If you have any questions, please reach out.
+
+Best,
+Project Manager
+

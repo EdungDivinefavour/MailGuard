@@ -1,0 +1,22 @@
+From: marketing@company.com
+To: team@company.com
+Subject: Contact List for Campaign
+
+Hi Team,
+
+Here's the contact list for our upcoming marketing campaign:
+
+Primary Contacts:
+- alice.johnson@client.com
+- bob.smith@partner.com
+- charlie.brown@vendor.com
+
+Secondary Contacts:
+- diana.prince@customer.com
+- edward.norton@supplier.com
+
+Please reach out to these contacts by end of week.
+
+Thanks,
+Marketing Team
+
