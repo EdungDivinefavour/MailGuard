@@ -1,7 +1,7 @@
-"""Database models for email interceptor."""
+"""Email log model."""
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, JSON
 from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
@@ -55,29 +55,4 @@ class EmailLog(db.Model):
             'error_message': self.error_message,
             'processing_time_ms': self.processing_time_ms
         }
-
-
-class EmailRecipient(db.Model):
-    """Model for storing email recipients (one-to-many relationship)."""
-    __tablename__ = 'email_recipients'
-    
-    id = Column(Integer, primary_key=True)
-    email_log_id = Column(Integer, ForeignKey('email_logs.id'), nullable=False)
-    email_address = Column(String(255), nullable=False)
-    recipient_type = Column(String(10), default='to')  # to, cc, bcc
-    
-    # Relationship
-    email_log = relationship('EmailLog', back_populates='recipients')
-
-
-class EmailAttachment(db.Model):
-    """Model for storing email attachment names (one-to-many relationship)."""
-    __tablename__ = 'email_attachments'
-    
-    id = Column(Integer, primary_key=True)
-    email_log_id = Column(Integer, ForeignKey('email_logs.id'), nullable=False)
-    filename = Column(String(500), nullable=False)
-    
-    # Relationship
-    email_log = relationship('EmailLog', back_populates='attachments')
 

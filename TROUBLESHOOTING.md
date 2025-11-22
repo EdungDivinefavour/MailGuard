@@ -46,8 +46,8 @@ FLASK_PORT=5001
 **Solution**:
 ```bash
 # Reset database (WARNING: deletes all logs)
-rm email_interceptor.db
-python -c "from app import app, db; app.app_context().push(); db.create_all()"
+rm instance/email_interceptor.db
+python main.py  # Will recreate database automatically
 ```
 
 ### SMTP Connection Fails
@@ -117,7 +117,7 @@ pip install -r requirements.txt
 If you encounter other issues:
 
 1. Check the logs: `email_interceptor.log`
-2. Run demo script to test detection: `python demo.py`
+2. Send test email: `python test_email.py`
 3. Verify all services are running:
    - Tika: `curl http://localhost:9998/tika`
    - Proxy: Check terminal output
@@ -136,12 +136,12 @@ source .venv/bin/activate
 which python
 
 # Check dependencies
-pip list | grep -E "flask|aiosmtpd|spacy"
+pip list | grep -E "flask|aiosmtpd"
 
 # Check Tika
 curl http://localhost:9998/tika
 
-# Test detection
-python demo.py
+# Test email sending
+python test_email.py
 ```
 

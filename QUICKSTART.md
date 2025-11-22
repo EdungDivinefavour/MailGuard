@@ -1,217 +1,64 @@
-# Quick Start Guide - Email Interceptor
+# Quick Start Guide
 
-## Step 1: Initial Setup
+Get the Email Interceptor running in 5 minutes.
 
-### Option A: Automated Setup (Recommended)
+## Step 1: Setup
+
 ```bash
 ./setup.sh
 ```
 
-### Option B: Manual Setup
+This handles everything: virtual environment, dependencies, Tika server, and configuration.
+
+## Step 2: Start the Interceptor
+
 ```bash
-# 1. Create virtual environment
-python3 -m venv .venv
+# Activate virtual environment
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Install spaCy model (optional but recommended)
-python -m spacy download en_core_web_sm
-
-# 4. Start Apache Tika server
-docker-compose up -d
-
-# 5. Create .env file (see Step 2)
-```
-
-## Step 2: Configure Environment
-
-Create a `.env` file in the project root:
-
-```bash
-cat > .env << 'EOF'
-# SMTP Proxy Configuration
-PROXY_HOST=0.0.0.0
-PROXY_PORT=2525
-UPSTREAM_SMTP_HOST=smtp.gmail.com
-UPSTREAM_SMTP_PORT=587
-
-# Apache Tika Configuration
-TIKA_SERVER_URL=http://localhost:9998
-
-# Flask UI Configuration
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5001
-FLASK_DEBUG=False
-SECRET_KEY=dev-secret-key-change-in-production
-
-# Database Configuration
-DATABASE_URL=sqlite:///email_interceptor.db
-
-# Policy Configuration
-DEFAULT_POLICY=tag
-MAX_ATTACHMENT_SIZE_MB=50
-MAX_ARCHIVE_DEPTH=5
-
-# Detection Thresholds
-MIN_CONFIDENCE=0.7
-ENABLE_SPACY=true
-
-# Quarantine Configuration
-QUARANTINE_DIR=./quarantine
-EOF
-```
-
-**Important**: Update `UPSTREAM_SMTP_HOST` and `UPSTREAM_SMTP_PORT` with your actual SMTP server settings.
-
-## Step 3: Start the Email Interceptor
-
-```bash
-# Make sure virtual environment is activated
-source .venv/bin/activate
 
 # Start the interceptor
 python main.py
 ```
 
-You should see output like:
+You should see:
 ```
-Starting Email Interceptor
-Configuration: tag policy, Tika: http://localhost:9998
-Starting SMTP proxy on 0.0.0.0:2525
-Forwarding to smtp.gmail.com:587
+✓ SMTP Proxy is listening on port 2525
+✓ Ready to intercept emails...
 Flask UI starting on http://0.0.0.0:5001
 Email Interceptor is running. Press Ctrl+C to stop.
 ```
 
-## Step 4: Access the Web Dashboard
-
-Open your browser and go to:
-```
-http://localhost:5001
-```
-
-You'll see the dashboard with statistics and email logs.
-
-## Step 5: Test the System
-
-### Test 1: Send Email with Sensitive Data
+## Step 3: Test It
 
 In a **new terminal** (keep the interceptor running):
 
 ```bash
-# Activate virtual environment
 source .venv/bin/activate
-
-# Send test email with sensitive data
-python test_email.py --type sensitive
+python test_email.py
 ```
 
-This will send an email containing:
-- Credit card: 4532-1234-5678-9010
-- SIN: 123-456-789
-- Email address
-- Phone number
-- IP address
+Choose an option from the menu (e.g., option 2 for credit card test).
 
-### Test 2: Send Benign Email
+## Step 4: View Results
 
-```bash
-python test_email.py --type benign
-```
+Open your browser to: `http://localhost:5001`
 
-This sends a regular email without sensitive data.
+You'll see:
+- Statistics (total emails, flagged, blocked)
+- Email logs with detection results
+- Policy actions applied
 
-### Test 3: Check the Dashboard
+## That's It!
 
-1. Go to `http://localhost:5001`
-2. You should see:
-   - Statistics updated (total emails, flagged, etc.)
-   - The test email in the logs
-   - Detection results showing what was found
-   - Policy applied (tag, block, etc.)
-
-### Test 4: Run Demo Script
-
-Test detection engine directly:
-
-```bash
-python demo.py
-```
-
-This will show detection results for various test cases.
-
-## Step 6: Configure Your Mail Client
-
-To use the proxy with a real mail client:
-
-1. **Configure your mail client** to use:
-   - SMTP Server: `localhost` (or your server IP)
-   - SMTP Port: `2525`
-   - Authentication: Same as your normal SMTP settings
-
-2. **Send an email** through your mail client
-
-3. **Check the dashboard** to see if it was intercepted and analyzed
-
-## Troubleshooting
-
-### Tika Server Not Running
-
-```bash
-# Check if Tika is running
-docker ps | grep tika
-
-# Start Tika if not running
-docker-compose up -d
-
-# Check Tika health
-curl http://localhost:9998/tika
-```
-
-### Port Already in Use
-
-If port 2525 or 5001 is already in use, change them in `.env`:
-```env
-PROXY_PORT=2526
-FLASK_PORT=5001
-```
-
-### Database Issues
-
-```bash
-# Reset database (WARNING: deletes all logs)
-rm email_interceptor.db
-python -c "from app import app, db; app.app_context().push(); db.create_all()"
-```
-
-### SMTP Connection Issues
-
-If you can't connect to the upstream SMTP server:
-1. Check `UPSTREAM_SMTP_HOST` and `UPSTREAM_SMTP_PORT` in `.env`
-2. Verify your network connection
-3. Check firewall settings
-4. For Gmail, you may need to use port 587 with TLS
-
-## Example Workflow
-
-1. **Start the interceptor**: `python main.py`
-2. **Open dashboard**: `http://localhost:5001`
-3. **Send test email**: `python test_email.py --type sensitive`
-4. **View results** in the dashboard:
-   - See the email in the logs
-   - Check detection results
-   - View applied policy
-   - See processing time
-5. **Filter emails**: Use the dashboard filters to see only flagged emails
-6. **Check statistics**: View overall stats and policy breakdown
+The system is now intercepting and analyzing emails. Send more test emails or configure your mail client to use `localhost:2525` as the SMTP server.
 
 ## Next Steps
 
-- Customize detection patterns in `detection_engine.py`
-- Adjust policy rules in `policy_engine.py`
-- Configure your mail server to route through the proxy
-- Set up monitoring and alerts
-- Review quarantined emails in the `quarantine/` directory
+- **Configure your mail client**: Point SMTP to `localhost:2525`
+- **Customize policies**: Edit `email_interceptor/engines/policy_engine.py`
+- **Add detection patterns**: Edit `email_interceptor/engines/detection_engine.py`
+- **Review logs**: Check the dashboard regularly
 
+## Troubleshooting
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for help with common issues.

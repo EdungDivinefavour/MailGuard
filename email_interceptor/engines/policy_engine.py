@@ -1,7 +1,5 @@
 """Policy enforcement engine for email handling."""
 import logging
-import os
-import shutil
 import copy
 from pathlib import Path
 from typing import List, Dict, Optional

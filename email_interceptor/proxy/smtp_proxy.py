@@ -1,21 +1,18 @@
 """SMTP proxy for intercepting and processing emails."""
 import asyncio
-import json
 import logging
 import smtplib
 import time
 import tempfile
 from email.message import EmailMessage
-from email.utils import parseaddr, formataddr
+from email.utils import parseaddr
 from aiosmtpd.controller import Controller
 from aiosmtpd.handlers import Message
 from email.parser import BytesParser
 
-from .config import Config
-from .detection_engine import DetectionEngine
-from .content_extractor import ContentExtractor
-from .policy_engine import PolicyEngine
-from .models import db, EmailLog, EmailRecipient, EmailAttachment
+from ..config import Config
+from ..engines import DetectionEngine, ContentExtractor, PolicyEngine
+from ..models import db, EmailLog, EmailRecipient, EmailAttachment
 
 logger = logging.getLogger(__name__)
 

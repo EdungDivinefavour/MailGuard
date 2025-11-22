@@ -1,12 +1,12 @@
 """Main entry point for the email interceptor."""
-import asyncio
 import logging
 import signal
 import sys
+import time
 from threading import Thread
 
 from email_interceptor.config import Config
-from email_interceptor.smtp_proxy import SMTPProxy
+from email_interceptor.proxy import SMTPProxy
 from app import app, init_db
 
 logging.basicConfig(
@@ -63,7 +63,6 @@ def main():
     
     # Keep main thread alive
     try:
-        import time
         while True:
             time.sleep(1)
     except KeyboardInterrupt:

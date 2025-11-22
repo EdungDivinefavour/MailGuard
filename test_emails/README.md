@@ -48,25 +48,21 @@ This folder contains sample emails for testing different scenarios with the emai
 
 ## How to Use
 
-### Option 1: Send via test_email.py (Recommended)
+### Send Test Emails
 
-You can modify `test_email.py` to read from these files:
+Use the interactive test script:
 
-```python
-# Read email content from file
-with open('test_emails/02_credit_card.txt', 'r') as f:
-    content = f.read()
+```bash
+python test_email.py
 ```
 
-### Option 2: Manual Testing
+This will show a menu with all available test emails. Choose a number to send that email type.
 
-1. Start the interceptor: `python main.py`
-2. Use these files as templates to create test emails
-3. Send them through the proxy using your mail client or test script
-
-### Option 3: Convert to .eml Format
-
-These .txt files can be converted to proper .eml format for more realistic testing.
+The script will:
+1. Read the email content from the selected file
+2. Send it through the SMTP proxy (localhost:2525)
+3. Show success/error messages
+4. Allow you to choose another email or quit
 
 ## Testing Checklist
 

@@ -1,6 +1,5 @@
 """Flask application for email interceptor UI."""
 from flask import Flask, render_template, jsonify, request
-from datetime import datetime, timedelta
 import logging
 
 from email_interceptor.config import Config
