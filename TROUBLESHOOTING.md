@@ -12,6 +12,7 @@
 2. Disable it in `.env`: `ENABLE_SPACY=false`
 3. Install it manually later if you want:
    ```bash
+   cd mailguard-server
    source .venv/bin/activate
    python -m spacy download en_core_web_sm
    ```
@@ -25,7 +26,7 @@ Regex detection (credit cards, SIN, SSN, emails) works without spaCy.
 **Solution**: 
 1. Install Docker Desktop from https://www.docker.com/products/docker-desktop
 2. Start Docker
-3. Run: `docker-compose up -d`
+3. Run: `cd mailguard-server && docker-compose up -d`
 
 You can test without Tika for basic email body detection, but attachment extraction needs Tika.
 
@@ -45,8 +46,10 @@ FLASK_PORT=5001
 
 **Solution**:
 ```bash
+cd mailguard-server
 # Reset database (this deletes all logs)
 rm instance/mailguard.db
+source .venv/bin/activate
 python main.py  # Creates a new database
 ```
 
@@ -92,10 +95,12 @@ python main.py  # Creates a new database
 
 **Solution**:
 ```bash
-# Make sure virtual environment is activated
-source .venv/bin/activate
+cd mailguard-server
+# Re-run setup script
+./setup.sh
 
-# Reinstall dependencies
+# Or manually:
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -105,7 +110,11 @@ pip install -r requirements.txt
 
 **Solution**:
 ```bash
-# Recreate virtual environment
+cd mailguard-server
+# Re-run setup script (it will recreate venv if needed)
+./setup.sh
+
+# Or manually:
 rm -rf .venv
 python3 -m venv .venv
 source .venv/bin/activate
@@ -131,7 +140,12 @@ Run these to make sure everything's set up:
 # Check Python
 python3 --version
 
+# Check Node.js
+node --version
+npm --version
+
 # Check virtual environment
+cd mailguard-server
 source .venv/bin/activate
 which python
 
@@ -144,4 +158,13 @@ curl http://localhost:9998/tika
 # Test email sending
 python test_email.py
 ```
+
+## Setup Scripts
+
+Each project has its own `setup.sh` script:
+- `mailguard-server/setup.sh` - Sets up Python venv, dependencies, .env, and Tika
+- `mailguard-client/setup.sh` - Installs npm dependencies
+- `smtp-client/setup.sh` - Installs npm dependencies
+
+Run `./start.sh` from the root directory to set up and start everything automatically.
 

@@ -1,0 +1,24 @@
+.app {
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .main-content {
+        flex-direction: column;
+    }
+}
+

@@ -35,6 +35,9 @@ wheels/
 # Quarantine
 quarantine/
 
+# Attachments
+attachments/
+
 # IDE
 .vscode/
 .idea/
@@ -50,3 +53,12 @@ Thumbs.db
 *.log
 logs/
 
+# Node.js / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+dist/
+build/

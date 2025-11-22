@@ -1,94 +1,139 @@
 # Project Structure
 
+This document describes the reorganized project structure.
+
 ## Directory Layout
 
 ```
-mailguard/
-├── mailguard/                  # Main Python package
-│   ├── __init__.py
-│   ├── config.py              # Configuration management
-│   ├── engines/               # Processing engines
-│   │   ├── __init__.py
-│   │   ├── detection_engine.py    # Pattern detection (regex)
-│   │   ├── content_extractor.py   # Apache Tika integration
-│   │   └── policy_engine.py       # Policy enforcement
-│   ├── models/                # Database models
-│   │   ├── __init__.py
-│   │   ├── email.py          # EmailLog model
-│   │   ├── recipient.py      # EmailRecipient model
-│   │   └── attachment.py     # EmailAttachment model
-│   └── proxy/                 # SMTP proxy
-│       ├── __init__.py
-│       └── smtp_proxy.py     # SMTP proxy handler
+email_interceptor/
+├── mailguard-server/      # Server-side code (Python)
+│   ├── mailguard/         # MailGuard package
+│   │   ├── config.py      # Configuration
+│   │   ├── engines/       # Detection, extraction, policy engines
+│   │   ├── models/        # Database models
+│   │   └── proxy/         # SMTP proxy server
+│   ├── app.py             # Flask API server
+│   ├── main.py            # Main entry point (starts proxy + Flask)
+│   ├── requirements.txt   # Python dependencies
+│   ├── setup.sh           # Setup script (venv, deps, Tika)
+│   ├── test_email.py      # Test script
+│   ├── docker-compose.yml # Docker config for Tika
+│   ├── instance/          # Database files
+│   ├── attachments/       # Stored email attachments
+│   ├── quarantine/        # Quarantined emails
+│   └── test_emails/       # Test email files
 │
-├── app.py                     # Flask web application
-├── main.py                    # Main entry point
-├── test_email.py              # Test email sender script
+├── mailguard-client/       # MailGuard Dashboard (React)
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── App.jsx        # Main app
+│   │   └── main.jsx       # Entry point
+│   ├── setup.sh           # Setup script (npm install)
+│   ├── package.json
+│   └── vite.config.js
 │
-├── static/                    # Static web assets
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── dashboard.js
+├── smtp-client/           # Email Client Application (React)
+│   ├── src/
+│   │   ├── components/    # Email client components
+│   │   ├── App.jsx        # Main app
+│   │   └── main.jsx       # Entry point
+│   ├── setup.sh           # Setup script (npm install)
+│   ├── package.json
+│   └── vite.config.js
 │
-├── templates/                 # HTML templates
-│   └── index.html
-│
-├── test_emails/               # Test email samples
-│   ├── README.md
-│   └── *.txt                  # Various test scenarios
-│
-├── instance/                  # Database files (gitignored)
-├── quarantine/                # Quarantined emails (gitignored)
-│
-├── requirements.txt           # Python dependencies
-├── docker-compose.yml         # Apache Tika setup
-├── setup.sh                   # Automated setup script
-└── .env                       # Environment config (gitignored)
+├── start.sh               # Main startup script (sets up and starts all services)
+└── start.ps1              # Windows startup script
 ```
 
-## Package Organization
+## Applications
 
-### `mailguard/engines/`
-Main processing code:
-- `detection_engine.py`: Finds sensitive patterns (credit cards, SIN, SSN, emails)
-- `content_extractor.py`: Pulls text from attachments using Apache Tika
-- `policy_engine.py`: Applies policies (block, sanitize, quarantine, tag)
+### 1. MailGuard Server (`mailguard-server/`)
+- **Purpose**: SMTP proxy that intercepts and processes emails
+- **Ports**: 
+  - SMTP Proxy: 2525
+  - Flask API: 5001
+- **Technology**: Python, Flask, SQLAlchemy
+- **Location**: All server code is in `mailguard-server/` directory
 
-### `mailguard/models/`
-Database models (SQLAlchemy):
-- `email.py`: Main `EmailLog` model and database instance
-- `recipient.py`: `EmailRecipient` model (one-to-many with EmailLog)
-- `attachment.py`: `EmailAttachment` model (one-to-many with EmailLog)
+### 2. MailGuard Dashboard (`mailguard-client/`)
+- **Purpose**: Admin dashboard to view intercepted emails and stats
+- **Port**: 3000
+- **Technology**: React, Vite
+- **Access**: `http://localhost:3000`
 
-### `mailguard/proxy/`
-SMTP proxy code:
-- `smtp_proxy.py`: Handles SMTP using aiosmtpd, processes emails and applies policies
+### 3. SMTP Email Client (`smtp-client/`)
+- **Purpose**: Email client for users to send/receive emails
+- **Port**: 3001
+- **Technology**: React, Vite
+- **Access**: `http://localhost:3001`
 
-### Root Level
-- `app.py`: Flask web app with API endpoints
-- `main.py`: Starts the SMTP proxy and Flask UI
-- `test_email.py`: Script to send test emails
+## Running the Project
 
-## Import Examples
-
-```python
-# From root level scripts
-from mailguard.config import Config
-from mailguard.engines import DetectionEngine, PolicyEngine
-from mailguard.proxy import SMTPProxy
-from mailguard.models import db, EmailLog
-
-# Within package (relative imports)
-from ..config import Config
-from ..engines import DetectionEngine
-from ..models import db
+### Quick Start (All Services)
+```bash
+./start.sh
 ```
+This will:
+- Set up all three projects (if needed)
+- Start all services
+- Show server logs in the current terminal
 
-## Design Notes
+### Manual Setup and Start
 
-- Each model in its own file to keep things organized
-- Engines folder groups the processing logic together
-- Proxy folder keeps SMTP handling separate
-- CSS and JS are in separate files from HTML
-- Test emails are in their own folder
+#### 1. Setup and Start Server
+```bash
+cd mailguard-server
+./setup.sh          # First time setup
+source .venv/bin/activate
+python main.py
+```
+This starts:
+- SMTP proxy on port 2525
+- Flask API on port 5001
+
+#### 2. Setup and Start MailGuard Dashboard
+```bash
+cd mailguard-client
+./setup.sh          # First time setup
+npm run dev
+```
+Access at: `http://localhost:3000`
+
+#### 3. Setup and Start Email Client
+```bash
+cd smtp-client
+./setup.sh          # First time setup
+npm run dev
+```
+Access at: `http://localhost:3001`
+
+## API Endpoints
+
+All endpoints are prefixed with `/api`:
+
+- `GET /api/emails` - Get email logs (with pagination/filters)
+- `GET /api/emails/<id>` - Get specific email details
+- `GET /api/stats` - Get statistics
+- `POST /api/send-email` - Send email via SMTP proxy
+- `GET /api/attachments/<id>/download` - Download email attachment
+
+## WebSocket Events
+
+- `new_email` - Emitted when a new email is processed (real-time updates)
+
+## Data Flow
+
+1. **User sends email** (smtp-client) → Flask API → SMTP Proxy (2525)
+2. **SMTP Proxy** intercepts → Processes → Logs to database
+3. **Dashboard** (mailguard-client) reads from database via API
+4. **Email Client** (smtp-client) reads from database via API
+
+## Notes
+
+- Both React apps proxy API requests to Flask (port 5001)
+- The SMTP proxy intercepts all emails sent through it
+- All emails are logged to the same SQLite database
+- CORS is enabled on Flask to allow both React apps to access APIs
+- Email attachments are stored in `mailguard-server/attachments/`
+- Each project has its own `setup.sh` script for easy setup
+- The main `start.sh` script orchestrates setup and startup of all services

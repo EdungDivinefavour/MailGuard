@@ -50,7 +50,11 @@ class EmailLog(db.Model):
             'detection_results': self.detection_results,
             'body_text': self.body_text[:500] if self.body_text else None,  # Truncate for display
             'attachment_count': self.attachment_count,
-            'attachment_names': [a.filename for a in self.attachments],  # Always an array
+            'attachment_names': [a.filename for a in self.attachments] if self.attachments else [],  # Always an array
+            'attachments': [
+                {'id': a.id, 'filename': a.filename, 'file_path': a.file_path}
+                for a in self.attachments
+            ] if self.attachments else [],  # Full attachment info with IDs
             'status': self.status,
             'error_message': self.error_message,
             'processing_time_ms': self.processing_time_ms

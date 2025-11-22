@@ -38,4 +38,8 @@ class Config:
     # Quarantine
     QUARANTINE_DIR = Path(os.getenv('QUARANTINE_DIR', './quarantine'))
     QUARANTINE_DIR.mkdir(exist_ok=True)
+    
+    # Attachments
+    ATTACHMENTS_DIR = Path(os.getenv('ATTACHMENTS_DIR', './attachments'))
+    ATTACHMENTS_DIR.mkdir(exist_ok=True)
 

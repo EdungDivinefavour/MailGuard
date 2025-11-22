@@ -7,7 +7,7 @@ from threading import Thread
 
 from mailguard.config import Config
 from mailguard.proxy import SMTPProxy
-from app import app, init_db
+from app import app, init_db, socketio
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def run_flask():
     """Run Flask in a separate thread."""
     init_db()
-    app.run(host=Config.FLASK_HOST, port=Config.FLASK_PORT, debug=Config.FLASK_DEBUG, use_reloader=False)
+    socketio.run(app, host=Config.FLASK_HOST, port=Config.FLASK_PORT, debug=Config.FLASK_DEBUG, allow_unsafe_werkzeug=True)
 
 def main():
     """Start the proxy and UI."""

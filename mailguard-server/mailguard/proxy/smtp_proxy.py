@@ -1,14 +1,11 @@
 """SMTP proxy for intercepting and processing emails."""
-import asyncio
 import logging
 import smtplib
 import time
-import tempfile
 from email.message import EmailMessage
 from email.utils import parseaddr
 from aiosmtpd.controller import Controller
 from aiosmtpd.handlers import Message
-from email.parser import BytesParser
 
 from ..config import Config
 from ..engines import DetectionEngine, ContentExtractor, PolicyEngine
@@ -55,7 +52,7 @@ class EmailHandler(Message):
             
             # Extract and process attachments
             attachment_texts = []
-            attachment_names = []
+            attachment_data = []  # Store (filename, file_path) tuples
             attachment_count = 0
             
             if message.is_multipart():
@@ -64,14 +61,20 @@ class EmailHandler(Message):
                         attachment_count += 1
                         filename = part.get_filename()
                         if filename:
-                            attachment_names.append(filename)
-                            
-                            # Save attachment temporarily
-                            with tempfile.NamedTemporaryFile(delete=False, suffix=filename) as tmp:
-                                payload = part.get_payload(decode=True)
-                                if payload:
-                                    tmp.write(payload)
-                                    tmp_path = tmp.name
+                            payload = part.get_payload(decode=True)
+                            if payload:
+                                # Save attachment permanently
+                                import os
+                                from datetime import datetime
+                                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                                safe_filename = "".join(c for c in filename if c.isalnum() or c in ('-', '_', '.'))[:200]
+                                attachment_file = Config.ATTACHMENTS_DIR / f"{timestamp}_{safe_filename}"
+                                
+                                try:
+                                    with open(attachment_file, 'wb') as f:
+                                        f.write(payload)
+                                    
+                                    attachment_data.append((filename, str(attachment_file)))
                                     
                                     # Extract text from attachment
                                     try:
@@ -79,27 +82,23 @@ class EmailHandler(Message):
                                         import zipfile
                                         import tarfile
                                         
-                                        if zipfile.is_zipfile(tmp_path) or tarfile.is_tarfile(tmp_path):
+                                        if zipfile.is_zipfile(attachment_file) or tarfile.is_tarfile(attachment_file):
                                             extracted = self.content_extractor.extract_from_archive(
-                                                tmp_path, 
+                                                str(attachment_file), 
                                                 max_depth=Config.MAX_ARCHIVE_DEPTH
                                             )
                                             attachment_texts.extend(extracted.values())
                                         else:
                                             text = self.content_extractor.extract_text(
-                                                tmp_path,
+                                                str(attachment_file),
                                                 max_size_mb=Config.MAX_ATTACHMENT_SIZE_MB
                                             )
                                             if text:
                                                 attachment_texts.append(text)
                                     except Exception as e:
                                         logger.error(f"Error processing attachment {filename}: {e}")
-                                    finally:
-                                        try:
-                                            import os
-                                            os.unlink(tmp_path)
-                                        except:
-                                            pass
+                                except Exception as e:
+                                    logger.error(f"Error saving attachment {filename}: {e}")
             
             # Combine all text for detection
             all_text = body_text
@@ -170,10 +169,11 @@ class EmailHandler(Message):
                         )
                         email_log.recipients.append(recipient_obj)
                     
-                    # Add attachment names (always as array)
-                    for attachment_name in attachment_names:
+                    # Add attachments with file paths (always as array)
+                    for filename, file_path in attachment_data:
                         attachment_obj = EmailAttachment(
-                            filename=attachment_name
+                            filename=filename,
+                            file_path=file_path
                         )
                         email_log.attachments.append(attachment_obj)
                     
@@ -182,6 +182,13 @@ class EmailHandler(Message):
                     print(f"✓ Email logged to database (ID: {email_log.id})")
                     print(f"   View in dashboard: http://localhost:{Config.FLASK_PORT}")
                     print(f"{'='*60}\n")
+                    
+                    # Emit real-time update via WebSocket
+                    try:
+                        from app import emit_new_email
+                        emit_new_email(email_log.to_dict())
+                    except Exception as ws_err:
+                        logger.debug(f"Could not emit WebSocket event: {ws_err}")
                 except Exception as db_err:
                     print(f"✗ Database error: {db_err}")
                     logger.error(f"Database error: {db_err}")
@@ -254,6 +261,13 @@ class EmailHandler(Message):
                     
                     db.session.add(email_log)
                     db.session.commit()
+                    
+                    # Emit real-time update via WebSocket
+                    try:
+                        from app import emit_new_email
+                        emit_new_email(email_log.to_dict())
+                    except Exception as ws_err:
+                        logger.debug(f"Could not emit WebSocket event: {ws_err}")
                 finally:
                     if ctx:
                         ctx.pop()
