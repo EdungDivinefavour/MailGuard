@@ -6,9 +6,11 @@ from pathlib import Path
 
 def list_test_emails():
     """List all available test email files."""
-    test_dir = Path('test_emails')
+    # Get the directory where this script is located
+    script_dir = Path(__file__).parent
+    test_dir = script_dir / 'fixtures'
     if not test_dir.exists():
-        print("✗ Error: test_emails directory not found.")
+        print("✗ Error: test fixtures directory not found.")
         return []
     
     files = sorted(test_dir.glob('*.txt'))
@@ -78,7 +80,7 @@ def show_menu():
     files = list_test_emails()
     
     if not files:
-        print("No test email files found in test_emails/ directory.")
+        print("No test email files found in tests/fixtures/ directory.")
         return None
     
     print("\n" + "=" * 60)
@@ -124,7 +126,7 @@ Examples:
   python test_email.py
   
   # Send specific email directly
-  python test_email.py --file test_emails/02_credit_card.txt
+  python tests/test_email.py --file tests/fixtures/02_credit_card.txt
   
   # List available emails
   python test_email.py --list

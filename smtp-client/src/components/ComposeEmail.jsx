@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { FiSend, FiX, FiPaperclip } from 'react-icons/fi'
+import { API_URL } from '../config'
 import './ComposeEmail.css'
 
 function ComposeEmail({ userEmail, onSend, onCancel }) {
@@ -40,7 +41,9 @@ function ComposeEmail({ userEmail, onSend, onCancel }) {
         formData.append(`attachment_${index}`, file)
       })
 
-      const response = await fetch('/api/send-email', {
+      // Use relative path if API_URL is empty (will go through Vite proxy)
+      const apiPath = API_URL ? `${API_URL}/api/send-email` : '/api/send-email'
+      const response = await fetch(apiPath, {
         method: 'POST',
         body: formData,
       })

@@ -38,7 +38,7 @@ class Config:
     
     # Detection
     MIN_CONFIDENCE = float(os.getenv('MIN_CONFIDENCE', 0.7))
-    ENABLE_SPACY = os.getenv('ENABLE_SPACY', 'true').lower() == 'true'
+    USE_PRESIDIO = os.getenv('USE_PRESIDIO', 'true').lower() == 'true'  # Use ML-based Presidio detection
     
     # Quarantine
     QUARANTINE_DIR = Path(os.getenv('QUARANTINE_DIR', './quarantine'))

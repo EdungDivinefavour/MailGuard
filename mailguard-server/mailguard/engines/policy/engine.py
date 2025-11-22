@@ -2,23 +2,13 @@
 import logging
 import copy
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict
 from email.message import EmailMessage
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
 
-from .detection_engine import DetectionResult
+from ...models import DetectionResult, PolicyDecision
 
 logger = logging.getLogger(__name__)
-
-@dataclass
-class PolicyDecision:
-    """Decision made by policy engine."""
-    action: str  # block, sanitize, quarantine, tag
-    reason: str
-    detections: List[Dict]
-    original_message: Optional[EmailMessage] = None
-    modified_message: Optional[EmailMessage] = None
-    quarantine_path: Optional[str] = None
 
 class PolicyEngine:
     """Engine for enforcing data leakage prevention policies."""
@@ -114,41 +104,31 @@ class PolicyEngine:
     def _quarantine_message(self, message: EmailMessage, detections: List[DetectionResult],
                            detection_dicts: List[Dict]) -> PolicyDecision:
         """Quarantine the message."""
-        import email.utils
-        from datetime import datetime
+        from ...services.storage import QuarantineStorage
         
-        # Create quarantine filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        message_id = message.get('Message-ID', 'unknown').replace('<', '').replace('>', '')
-        safe_message_id = "".join(c for c in message_id if c.isalnum() or c in ('-', '_'))[:50]
-        quarantine_file = self.quarantine_dir / f"{timestamp}_{safe_message_id}.eml"
+        quarantine_storage = QuarantineStorage(self.quarantine_dir)
+        quarantine_path = quarantine_storage.save(message)
         
-        # Save message to quarantine
-        try:
-            with open(quarantine_file, 'wb') as f:
-                f.write(message.as_bytes())
-            
-            reason = f"Quarantined: {len(detections)} sensitive data pattern(s) detected"
-            if detections:
-                reason += f" (e.g., {detections[0].pattern_type})"
-            
-            return PolicyDecision(
-                action='quarantine',
-                reason=reason,
-                detections=detection_dicts,
-                original_message=message,
-                quarantine_path=str(quarantine_file)
-            )
-        except Exception as e:
-            logger.error(f"Error quarantining message: {e}")
+        if not quarantine_path:
+            logger.error("Error quarantining message")
             # Fallback to blocking
             return self._block_message(message, detections, detection_dicts)
+        
+        reason = f"Quarantined: {len(detections)} sensitive data pattern(s) detected"
+        if detections:
+            reason += f" (e.g., {detections[0].pattern_type})"
+        
+        return PolicyDecision(
+            action='quarantine',
+            reason=reason,
+            detections=detection_dicts,
+            original_message=message,
+            quarantine_path=quarantine_path
+        )
     
     def _sanitize_message(self, message: EmailMessage, detections: List[DetectionResult],
                          detection_dicts: List[Dict]) -> PolicyDecision:
         """Sanitize sensitive data from message."""
-        import copy
-        
         sanitized = copy.deepcopy(message)
         
         # Get body text

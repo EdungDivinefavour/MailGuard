@@ -113,6 +113,10 @@ You can edit the `.env` file to change settings. Here are the important ones:
   - `sanitize` - Remove the sensitive data and send the rest
   - `quarantine` - Save it to a folder instead of sending
 
+**Detection settings:**
+- `USE_PRESIDIO` - Set to `true` to use ML-based Presidio detection (default, recommended) or `false` to use regex-only
+- `MIN_CONFIDENCE` - Minimum confidence threshold (0.0-1.0) for detections (default: 0.7)
+
 **Other useful settings:**
 - `PROXY_PORT` - Change if port 2525 is already in use
 - `FLASK_PORT` - Change if port 5001 is already in use
@@ -135,11 +139,24 @@ This lets you send test emails with different types of sensitive data to see how
 
 ## What Gets Detected?
 
-MailGuard looks for:
+MailGuard uses **Presidio** (Microsoft's ML-based PII detection library) to automatically scan for sensitive information. This provides more accurate detection than simple regex patterns.
+
+MailGuard can detect:
 - **Credit card numbers** - Like `4532-1234-5678-9010`
 - **Social Security Numbers (SSN)** - Like `123-45-6789`
 - **Canadian SIN numbers** - Like `123-456-789`
 - **Email addresses** - Any email addresses in the content
+- **Phone numbers** - Various formats
+- **Bank account numbers** - US bank account numbers
+- **IP addresses** - IPv4 and IPv6 addresses
+- **Passport numbers** - US passport numbers
+- **Driver's license numbers** - US driver's license numbers
+- **Person names** - Detected through Named Entity Recognition
+- **Organizations** - Company and organization names
+- **Locations** - Geographic locations
+- **Dates and times** - Sensitive date/time information
+
+The ML models provide confidence scores for each detection, allowing you to filter false positives.
 
 ## Troubleshooting
 
@@ -156,6 +173,17 @@ Make sure Docker is running! On Mac/Windows, you need Docker Desktop to be open.
 ### Can't Access the Web Pages
 
 Wait a minute or two after starting - the services need time to boot up. Check the logs with `docker-compose logs -f` to see if there are any errors.
+
+### Presidio/ML Detection Not Working
+
+If you see warnings about Presidio or spaCy models not being found:
+1. The Docker image should automatically download the required spaCy model (`en_core_web_sm`) during build
+2. If it fails, you can manually install it by running:
+   ```bash
+   docker-compose exec mailguard-server python -m spacy download en_core_web_sm
+   ```
+3. If Presidio fails to initialize, the system will automatically fall back to regex-based detection
+4. Check the logs with `docker-compose logs -f mailguard-server` to see what's happening
 
 ### Need to Start Fresh
 

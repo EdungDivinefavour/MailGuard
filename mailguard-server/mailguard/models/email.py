@@ -38,25 +38,50 @@ class EmailLog(db.Model):
     
     def to_dict(self):
         """Convert model to dictionary."""
-        return {
-            'id': self.id,
-            'message_id': self.message_id,
-            'sender': self.sender,
-            'recipients': [r.email_address for r in self.recipients],  # Always an array
-            'subject': self.subject,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
-            'flagged': self.flagged,
-            'policy_applied': self.policy_applied,
-            'detection_results': self.detection_results,
-            'body_text': self.body_text[:500] if self.body_text else None,  # Truncate for display
-            'attachment_count': self.attachment_count,
-            'attachment_names': [a.filename for a in self.attachments] if self.attachments else [],  # Always an array
-            'attachments': [
-                {'id': a.id, 'filename': a.filename, 'file_path': a.file_path}
-                for a in self.attachments
-            ] if self.attachments else [],  # Full attachment info with IDs
-            'status': self.status,
-            'error_message': self.error_message,
-            'processing_time_ms': self.processing_time_ms
-        }
+        try:
+            recipients_list = []
+            if hasattr(self, 'recipients') and self.recipients is not None:
+                recipients_list = [r.email_address for r in self.recipients if hasattr(r, 'email_address')]
+            
+            attachments_list = []
+            attachment_names_list = []
+            if hasattr(self, 'attachments') and self.attachments is not None:
+                attachments_list = [
+                    {'id': a.id, 'filename': a.filename, 'file_path': a.file_path}
+                    for a in self.attachments if hasattr(a, 'id') and hasattr(a, 'filename')
+                ]
+                attachment_names_list = [a.filename for a in self.attachments if hasattr(a, 'filename')]
+            
+            return {
+                'id': self.id,
+                'message_id': self.message_id,
+                'sender': self.sender,
+                'recipients': recipients_list,
+                'subject': self.subject,
+                'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+                'flagged': self.flagged,
+                'policy_applied': self.policy_applied,
+                'detection_results': self.detection_results,
+                'body_text': self.body_text[:500] if self.body_text else None,
+                'attachment_count': self.attachment_count,
+                'attachment_names': attachment_names_list,
+                'attachments': attachments_list,
+                'status': self.status,
+                'error_message': self.error_message,
+                'processing_time_ms': self.processing_time_ms
+            }
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in to_dict for email {self.id}: {e}", exc_info=True)
+            return {
+                'id': self.id,
+                'message_id': getattr(self, 'message_id', None),
+                'sender': getattr(self, 'sender', None),
+                'recipients': [],
+                'subject': getattr(self, 'subject', None),
+                'timestamp': self.timestamp.isoformat() if hasattr(self, 'timestamp') and self.timestamp else None,
+                'flagged': getattr(self, 'flagged', False),
+                'error': str(e)
+            }
 

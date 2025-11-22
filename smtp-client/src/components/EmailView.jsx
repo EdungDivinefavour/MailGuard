@@ -1,4 +1,5 @@
 import { FiX, FiPaperclip, FiDownload } from 'react-icons/fi'
+import { API_URL } from '../config'
 import './EmailView.css'
 
 function EmailView({ email, onClose }) {
@@ -55,7 +56,7 @@ function EmailView({ email, onClose }) {
                   return (
                     <a
                       key={attachmentId || idx}
-                      href={`/api/attachments/${attachmentId}/download`}
+                      href={API_URL ? `${API_URL}/api/attachments/${attachmentId}/download` : `/api/attachments/${attachmentId}/download`}
                       download={filename}
                       className="attachment-item"
                       title="Click to download"
