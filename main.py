@@ -1,19 +1,19 @@
-"""Main entry point for the email interceptor."""
+"""Main entry point for MailGuard."""
 import logging
 import signal
 import sys
 import time
 from threading import Thread
 
-from email_interceptor.config import Config
-from email_interceptor.proxy import SMTPProxy
+from mailguard.config import Config
+from mailguard.proxy import SMTPProxy
 from app import app, init_db
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('email_interceptor.log'),
+        logging.FileHandler('mailguard.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -27,14 +27,14 @@ def run_flask():
 
 def main():
     """Main function to start proxy and UI."""
-    logger.info("Starting Email Interceptor")
+    logger.info("Starting MailGuard")
     logger.info(f"Configuration: {Config.DEFAULT_POLICY} policy, Tika: {Config.TIKA_SERVER_URL}")
     
     # Initialize database
     init_db()
     
     # Set up database context for SMTP proxy
-    from email_interceptor.models import db
+    from mailguard.models import db
     with app.app_context():
         db.create_all()
         logger.info("Database tables created/verified")
@@ -50,7 +50,7 @@ def main():
     flask_thread.start()
     
     logger.info(f"Flask UI starting on http://{Config.FLASK_HOST}:{Config.FLASK_PORT}")
-    logger.info("Email Interceptor is running. Press Ctrl+C to stop.")
+    logger.info("MailGuard is running. Press Ctrl+C to stop.")
     
     # Handle shutdown
     def signal_handler(sig, frame):

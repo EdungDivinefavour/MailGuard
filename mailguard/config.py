@@ -1,4 +1,4 @@
-"""Configuration management for the email interceptor."""
+"""Configuration management for MailGuard."""
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -24,7 +24,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Database
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///email_interceptor.db')
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///mailguard.db')
     
     # Policy
     DEFAULT_POLICY = os.getenv('DEFAULT_POLICY', 'tag')

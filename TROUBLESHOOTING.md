@@ -46,7 +46,7 @@ FLASK_PORT=5001
 **Solution**:
 ```bash
 # Reset database (WARNING: deletes all logs)
-rm instance/email_interceptor.db
+rm instance/mailguard.db
 python main.py  # Will recreate database automatically
 ```
 
@@ -116,7 +116,7 @@ pip install -r requirements.txt
 
 If you encounter other issues:
 
-1. Check the logs: `email_interceptor.log`
+1. Check the logs: `mailguard.log`
 2. Send test email: `python test_email.py`
 3. Verify all services are running:
    - Tika: `curl http://localhost:9998/tika`

@@ -1,9 +1,9 @@
-"""Flask application for email interceptor UI."""
+"""Flask application for MailGuard UI."""
 from flask import Flask, render_template, jsonify, request
 import logging
 
-from email_interceptor.config import Config
-from email_interceptor.models import db, EmailLog
+from mailguard.config import Config
+from mailguard.models import db, EmailLog
 
 app = Flask(__name__,
             template_folder='templates',

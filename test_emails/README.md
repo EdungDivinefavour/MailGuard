@@ -1,6 +1,6 @@
 # Test Email Samples
 
-This folder contains sample emails for testing different scenarios with the email interceptor.
+This folder contains sample emails for testing different scenarios with MailGuard.
 
 ## Email Files
 

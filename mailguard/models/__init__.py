@@ -1,4 +1,4 @@
-"""Database models for email interceptor."""
+"""Database models for MailGuard."""
 # Import in order to ensure relationships are registered
 from .email import db, EmailLog
 from .recipient import EmailRecipient

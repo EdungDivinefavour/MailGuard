@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get the Email Interceptor running in 5 minutes.
+Get MailGuard running in 5 minutes.
 
 ## Step 1: Setup
 
@@ -10,13 +10,13 @@ Get the Email Interceptor running in 5 minutes.
 
 This handles everything: virtual environment, dependencies, Tika server, and configuration.
 
-## Step 2: Start the Interceptor
+## Step 2: Start MailGuard
 
 ```bash
 # Activate virtual environment
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Start the interceptor
+# Start MailGuard
 python main.py
 ```
 
@@ -25,7 +25,7 @@ You should see:
 ✓ SMTP Proxy is listening on port 2525
 ✓ Ready to intercept emails...
 Flask UI starting on http://0.0.0.0:5001
-Email Interceptor is running. Press Ctrl+C to stop.
+MailGuard is running. Press Ctrl+C to stop.
 ```
 
 ## Step 3: Test It
@@ -55,8 +55,8 @@ The system is now intercepting and analyzing emails. Send more test emails or co
 ## Next Steps
 
 - **Configure your mail client**: Point SMTP to `localhost:2525`
-- **Customize policies**: Edit `email_interceptor/engines/policy_engine.py`
-- **Add detection patterns**: Edit `email_interceptor/engines/detection_engine.py`
+- **Customize policies**: Edit `mailguard/engines/policy_engine.py`
+- **Add detection patterns**: Edit `mailguard/engines/detection_engine.py`
 - **Review logs**: Check the dashboard regularly
 
 ## Troubleshooting

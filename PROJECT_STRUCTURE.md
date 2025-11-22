@@ -3,8 +3,8 @@
 ## Directory Layout
 
 ```
-email_interceptor/
-├── email_interceptor/          # Main Python package
+mailguard/
+├── mailguard/                  # Main Python package
 │   ├── __init__.py
 │   ├── config.py              # Configuration management
 │   ├── engines/               # Processing engines
@@ -49,19 +49,19 @@ email_interceptor/
 
 ## Package Organization
 
-### `email_interceptor/engines/`
+### `mailguard/engines/`
 Core processing logic:
 - **detection_engine.py**: Detects sensitive patterns (credit cards, SIN, SSN, emails)
 - **content_extractor.py**: Extracts text from attachments using Apache Tika
 - **policy_engine.py**: Enforces policies (block, sanitize, quarantine, tag)
 
-### `email_interceptor/models/`
+### `mailguard/models/`
 Database models using SQLAlchemy:
 - **email.py**: Main `EmailLog` model and database instance
 - **recipient.py**: `EmailRecipient` model (one-to-many with EmailLog)
 - **attachment.py**: `EmailAttachment` model (one-to-many with EmailLog)
 
-### `email_interceptor/proxy/`
+### `mailguard/proxy/`
 SMTP proxy implementation:
 - **smtp_proxy.py**: SMTP handler using aiosmtpd, processes emails and applies policies
 
@@ -74,10 +74,10 @@ SMTP proxy implementation:
 
 ```python
 # From root level scripts
-from email_interceptor.config import Config
-from email_interceptor.engines import DetectionEngine, PolicyEngine
-from email_interceptor.proxy import SMTPProxy
-from email_interceptor.models import db, EmailLog
+from mailguard.config import Config
+from mailguard.engines import DetectionEngine, PolicyEngine
+from mailguard.proxy import SMTPProxy
+from mailguard.models import db, EmailLog
 
 # Within package (relative imports)
 from ..config import Config

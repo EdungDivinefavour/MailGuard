@@ -82,7 +82,7 @@ def show_menu():
         return None
     
     print("\n" + "=" * 60)
-    print("Email Interceptor - Test Email Sender")
+    print("MailGuard - Test Email Sender")
     print("=" * 60)
     print("\nAvailable test emails:\n")
     

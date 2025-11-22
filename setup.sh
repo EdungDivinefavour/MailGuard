@@ -1,11 +1,11 @@
 #!/bin/bash
-# Setup script for Email Interceptor
+# Setup script for MailGuard
 
 # Don't exit on error for optional steps
 set +e
 
-echo "Email Interceptor - Setup Script"
-echo "================================"
+echo "MailGuard - Setup Script"
+echo "========================"
 echo ""
 
 # Check Python version
@@ -70,7 +70,7 @@ FLASK_DEBUG=False
 SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')
 
 # Database Configuration
-DATABASE_URL=sqlite:///email_interceptor.db
+DATABASE_URL=sqlite:///mailguard.db
 
 # Policy Configuration
 DEFAULT_POLICY=tag
@@ -109,7 +109,7 @@ echo "Setup complete!"
 echo ""
 echo "Next steps:"
 echo "2. Activate virtual environment: source .venv/bin/activate"
-echo "3. Start the interceptor: python main.py"
+echo "3. Start MailGuard: python main.py"
 echo "4. Access the dashboard: http://localhost:5001"
 echo ""
 

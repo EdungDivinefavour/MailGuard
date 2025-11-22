@@ -1,4 +1,4 @@
-# Email Interceptor - Data Leakage Prevention (DLP) Proxy
+# MailGuard - Data Leakage Prevention (DLP) Proxy
 
 An inline SMTP proxy that intercepts outbound emails, inspects content, and enforces data leakage prevention policies (block, sanitize, quarantine, or tag).
 
@@ -12,7 +12,7 @@ An inline SMTP proxy that intercepts outbound emails, inspects content, and enfo
 
 This handles everything: virtual environment, dependencies, Tika server, and configuration.
 
-### 2. Start the Interceptor
+### 2. Start MailGuard
 
 ```bash
 python main.py
@@ -64,8 +64,8 @@ ENABLE_SPACY=false
 ## Project Structure
 
 ```
-email_interceptor/
-├── email_interceptor/          # Main package
+mailguard/
+├── mailguard/                 # Main package
 │   ├── config.py              # Configuration
 │   ├── engines/               # Processing engines
 │   │   ├── detection_engine.py
