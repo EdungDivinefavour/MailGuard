@@ -52,8 +52,7 @@
                     <option value="error">Error</option>
                 </select>
             </label>
-            <button onclick="loadEmails()">Apply Filters</button>
-            <button onclick="loadStats()">Refresh Stats</button>
+            <button onclick="loadStats(); return false;">Refresh Stats</button>
         </div>
 
         <div class="emails-table">
@@ -77,9 +76,9 @@
                 </tbody>
             </table>
             <div class="pagination" id="pagination" style="display: none;">
-                <button id="prevPage" onclick="changePage(-1)">Previous</button>
+                <button id="prevPage" onclick="changePage(-1, event); return false;">Previous</button>
                 <span id="pageInfo">Page 1 of 1</span>
-                <button id="nextPage" onclick="changePage(1)">Next</button>
+                <button id="nextPage" onclick="changePage(1, event); return false;">Next</button>
             </div>
         </div>
     </div>

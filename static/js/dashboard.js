@@ -104,17 +104,43 @@ async function loadEmails() {
     }
 }
 
-function changePage(delta) {
+function changePage(delta, event) {
+    if (event) {
+        event.preventDefault();
+    }
     const newPage = currentPage + delta;
     if (newPage >= 1 && newPage <= totalPages) {
         currentPage = newPage;
         loadEmails();
+    }
+    return false;
+}
+
+// Auto-apply filters when changed
+function setupFilterListeners() {
+    const flaggedOnly = document.getElementById('flaggedOnly');
+    const statusFilter = document.getElementById('statusFilter');
+
+    if (flaggedOnly) {
+        flaggedOnly.addEventListener('change', function () {
+            currentPage = 1; // Reset to first page when filter changes
+            loadEmails();
+        });
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function (e) {
+            e.preventDefault();
+            currentPage = 1; // Reset to first page when filter changes
+            loadEmails();
+        });
     }
 }
 
 // Initial load
 loadStats();
 loadEmails();
+setupFilterListeners();
 
 // Auto-refresh every 30 seconds
 setInterval(() => {
