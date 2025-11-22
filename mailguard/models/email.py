@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 db = SQLAlchemy()
 
 class EmailLog(db.Model):
-    """Model for storing intercepted email metadata."""
+    """Stores intercepted email info."""
     __tablename__ = 'email_logs'
     
     id = Column(Integer, primary_key=True)

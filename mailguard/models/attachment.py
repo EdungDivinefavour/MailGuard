@@ -5,7 +5,7 @@ from .email import db
 
 
 class EmailAttachment(db.Model):
-    """Model for storing email attachment names (one-to-many relationship)."""
+    """Stores email attachment filenames (one-to-many with EmailLog)."""
     __tablename__ = 'email_attachments'
     
     id = Column(Integer, primary_key=True)

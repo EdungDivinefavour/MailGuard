@@ -50,25 +50,25 @@ mailguard/
 ## Package Organization
 
 ### `mailguard/engines/`
-Core processing logic:
-- **detection_engine.py**: Detects sensitive patterns (credit cards, SIN, SSN, emails)
-- **content_extractor.py**: Extracts text from attachments using Apache Tika
-- **policy_engine.py**: Enforces policies (block, sanitize, quarantine, tag)
+Main processing code:
+- `detection_engine.py`: Finds sensitive patterns (credit cards, SIN, SSN, emails)
+- `content_extractor.py`: Pulls text from attachments using Apache Tika
+- `policy_engine.py`: Applies policies (block, sanitize, quarantine, tag)
 
 ### `mailguard/models/`
-Database models using SQLAlchemy:
-- **email.py**: Main `EmailLog` model and database instance
-- **recipient.py**: `EmailRecipient` model (one-to-many with EmailLog)
-- **attachment.py**: `EmailAttachment` model (one-to-many with EmailLog)
+Database models (SQLAlchemy):
+- `email.py`: Main `EmailLog` model and database instance
+- `recipient.py`: `EmailRecipient` model (one-to-many with EmailLog)
+- `attachment.py`: `EmailAttachment` model (one-to-many with EmailLog)
 
 ### `mailguard/proxy/`
-SMTP proxy implementation:
-- **smtp_proxy.py**: SMTP handler using aiosmtpd, processes emails and applies policies
+SMTP proxy code:
+- `smtp_proxy.py`: Handles SMTP using aiosmtpd, processes emails and applies policies
 
 ### Root Level
-- **app.py**: Flask web application with API endpoints
-- **main.py**: Starts both SMTP proxy and Flask UI
-- **test_email.py**: Interactive script to send test emails
+- `app.py`: Flask web app with API endpoints
+- `main.py`: Starts the SMTP proxy and Flask UI
+- `test_email.py`: Script to send test emails
 
 ## Import Examples
 
@@ -85,10 +85,10 @@ from ..engines import DetectionEngine
 from ..models import db
 ```
 
-## Key Design Decisions
+## Design Notes
 
-1. **Separate models**: Each model in its own file for clarity
-2. **Engines folder**: Groups related processing logic
-3. **Proxy folder**: Isolates SMTP handling code
-4. **Static assets**: CSS and JS separated from HTML
-5. **Test emails**: Organized in dedicated folder
+- Each model in its own file to keep things organized
+- Engines folder groups the processing logic together
+- Proxy folder keeps SMTP handling separate
+- CSS and JS are in separate files from HTML
+- Test emails are in their own folder

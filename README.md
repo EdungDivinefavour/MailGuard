@@ -1,6 +1,6 @@
 # MailGuard - Data Leakage Prevention (DLP) Proxy
 
-An inline SMTP proxy that intercepts outbound emails, inspects content, and enforces data leakage prevention policies (block, sanitize, quarantine, or tag).
+SMTP proxy that sits between your mail client and the mail server. It intercepts emails, checks for sensitive data, and can block, sanitize, quarantine, or tag them.
 
 ## Quick Start
 
@@ -10,7 +10,7 @@ An inline SMTP proxy that intercepts outbound emails, inspects content, and enfo
 ./setup.sh
 ```
 
-This handles everything: virtual environment, dependencies, Tika server, and configuration.
+Sets up the virtual environment, installs dependencies, starts Tika, and creates the config file.
 
 ### 2. Start MailGuard
 
@@ -18,22 +18,20 @@ This handles everything: virtual environment, dependencies, Tika server, and con
 python main.py
 ```
 
-This starts:
-- **SMTP Proxy** on port `2525` (intercepts emails)
-- **Web Dashboard** on port `5001` (view logs)
+Runs the SMTP proxy on port 2525 and the web dashboard on port 5001.
 
 ### 3. Test It
 
-In a new terminal:
+Open a new terminal and run:
 ```bash
 python test_email.py
 ```
 
-Choose a test email from the menu. Then check the dashboard at `http://localhost:5001`
+Pick a test email from the menu, then check the dashboard at `http://localhost:5001`
 
 ## Configuration
 
-Create a `.env` file (or edit the one created by setup.sh):
+The setup script creates a `.env` file. Edit it to change settings:
 
 ```env
 # SMTP Proxy
@@ -55,81 +53,43 @@ ENABLE_SPACY=false
 
 ## Features
 
-- **SMTP Proxy**: Intercepts emails between mail relay and outbound server
-- **Content Extraction**: Extracts text from attachments (PDF, DOCX, ZIP, etc.) using Apache Tika
-- **Detection**: Regex patterns for credit cards, SINs, SSNs, email addresses
-- **Policy Actions**: Block, sanitize, quarantine, or tag emails with sensitive data
-- **Web Dashboard**: Monitor intercepted emails, view detection results, and statistics
-
-## Project Structure
-
-```
-mailguard/
-├── mailguard/                 # Main package
-│   ├── config.py              # Configuration
-│   ├── engines/               # Processing engines
-│   │   ├── detection_engine.py
-│   │   ├── content_extractor.py
-│   │   └── policy_engine.py
-│   ├── models/                # Database models
-│   │   ├── email.py
-│   │   ├── recipient.py
-│   │   └── attachment.py
-│   └── proxy/                 # SMTP proxy
-│       └── smtp_proxy.py
-├── app.py                     # Flask web app
-├── main.py                    # Entry point
-├── test_email.py              # Test script
-├── static/                    # CSS/JS
-├── templates/                 # HTML templates
-└── test_emails/               # Test email samples
-```
+- SMTP proxy that intercepts emails before they're sent
+- Extracts text from attachments (PDF, DOCX, ZIP, etc.) using Apache Tika
+- Detects credit cards, SINs, SSNs, and email addresses using regex
+- Can block, sanitize, quarantine, or tag emails with sensitive data
+- Web dashboard to view intercepted emails and stats
 
 ## Usage
 
-### Send Test Emails
-
-```bash
-python test_email.py
-```
-
-Interactive menu to choose from various test email types.
-
-### Access Dashboard
-
-Open `http://localhost:5001` in your browser to:
-- View intercepted emails
-- See detection results
-- Filter by flagged/status
-- View statistics
-
-### Configure Mail Client
-
 Point your mail client to use the proxy:
-- **SMTP Server**: `localhost`
-- **SMTP Port**: `2525`
+- SMTP Server: `localhost`
+- SMTP Port: `2525`
 
-The proxy will forward to your configured upstream SMTP server.
+The proxy forwards emails to your upstream SMTP server after checking them.
+
+For more details, see [QUICKSTART.md](QUICKSTART.md).
 
 ## Detection Patterns
 
-- **Credit Cards**: Format `XXXX-XXXX-XXXX-XXXX`
-- **SIN (Social Insurance Number)**: Canadian format `XXX-XXX-XXX`
-- **SSN (Social Security Number)**: US format `XXX-XX-XXXX`
-- **Email Addresses**: Standard email format
+- Credit cards: `XXXX-XXXX-XXXX-XXXX` format
+- SIN (Canadian): `XXX-XXX-XXX` format
+- SSN (US): `XXX-XX-XXXX` format
+- Email addresses: standard email format
 
 ## Policy Actions
 
-- **block**: Prevent email from being sent
-- **sanitize**: Remove sensitive data, replace with `[REDACTED]`
-- **quarantine**: Save email to quarantine directory
-- **tag**: Add warning headers to email (default)
-
-## Troubleshooting
-
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues and solutions.
+- `block`: Don't send the email
+- `sanitize`: Replace sensitive data with `[REDACTED]`
+- `quarantine`: Save to quarantine folder
+- `tag`: Add warning headers (default)
 
 ## Requirements
 
 - Python 3.8+
-- Docker (for Apache Tika - handled by setup.sh)
+- Docker (for Apache Tika)
+
+## Documentation
+
+- [QUICKSTART.md](QUICKSTART.md) - Get started quickly
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and solutions
+- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - Code organization

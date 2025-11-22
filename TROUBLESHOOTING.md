@@ -6,17 +6,17 @@
 
 **Error**: `HTTP error 404` or `Could not install requirement`
 
-**Solution**: spaCy is optional! The system works fine without it.
+**Solution**: spaCy is optional. Everything works fine without it.
 
-1. **Skip spaCy installation**: When prompted during setup, choose 'n'
-2. **Disable spaCy in config**: Set `ENABLE_SPACY=false` in `.env`
-3. **Install manually later** (if needed):
+1. Skip spaCy during setup (choose 'n' when asked)
+2. Disable it in `.env`: `ENABLE_SPACY=false`
+3. Install it manually later if you want:
    ```bash
    source .venv/bin/activate
    python -m spacy download en_core_web_sm
    ```
 
-The regex-based detection (credit cards, SIN, SSN, emails) works without spaCy.
+Regex detection (credit cards, SIN, SSN, emails) works without spaCy.
 
 ### Docker/Tika Not Available
 
@@ -27,7 +27,7 @@ The regex-based detection (credit cards, SIN, SSN, emails) works without spaCy.
 2. Start Docker
 3. Run: `docker-compose up -d`
 
-**Alternative**: You can test the system without Tika for basic email body detection. Attachment extraction requires Tika.
+You can test without Tika for basic email body detection, but attachment extraction needs Tika.
 
 ### Port Already in Use
 
@@ -45,9 +45,9 @@ FLASK_PORT=5001
 
 **Solution**:
 ```bash
-# Reset database (WARNING: deletes all logs)
+# Reset database (this deletes all logs)
 rm instance/mailguard.db
-python main.py  # Will recreate database automatically
+python main.py  # Creates a new database
 ```
 
 ### SMTP Connection Fails
@@ -114,18 +114,18 @@ pip install -r requirements.txt
 
 ## Getting Help
 
-If you encounter other issues:
+If something else breaks:
 
 1. Check the logs: `mailguard.log`
-2. Send test email: `python test_email.py`
-3. Verify all services are running:
+2. Try sending a test email: `python test_email.py`
+3. Make sure everything is running:
    - Tika: `curl http://localhost:9998/tika`
-   - Proxy: Check terminal output
-   - Flask: Check terminal output
+   - Proxy: check terminal output
+   - Flask: check terminal output
 
 ## Quick Health Check
 
-Run these commands to verify everything is set up:
+Run these to make sure everything's set up:
 
 ```bash
 # Check Python

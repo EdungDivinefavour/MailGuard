@@ -19,12 +19,12 @@ logger = logging.getLogger(__name__)
 
 @app.route('/')
 def index():
-    """Main dashboard page."""
+    """Dashboard page."""
     return render_template('index.html')
 
 @app.route('/api/emails', methods=['GET'])
 def get_emails():
-    """Get paginated email logs."""
+    """Get email logs with pagination."""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
     flagged_only = request.args.get('flagged', 'false').lower() == 'true'
@@ -52,19 +52,19 @@ def get_emails():
 
 @app.route('/api/emails/<int:email_id>', methods=['GET'])
 def get_email(email_id):
-    """Get detailed email information."""
+    """Get details for a specific email."""
     email = EmailLog.query.get_or_404(email_id)
     return jsonify(email.to_dict())
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    """Get statistics about intercepted emails."""
+    """Get stats about intercepted emails."""
     total = EmailLog.query.count()
     flagged = EmailLog.query.filter(EmailLog.flagged == True).count()
     blocked = EmailLog.query.filter(EmailLog.status == 'blocked').count()
     quarantined = EmailLog.query.filter(EmailLog.status == 'quarantined').count()
     
-    # Average processing time
+    # Calculate average processing time
     avg_time = db.session.query(db.func.avg(EmailLog.processing_time_ms)).scalar()
     avg_time = round(avg_time, 2) if avg_time else 0
     

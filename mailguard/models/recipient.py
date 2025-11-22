@@ -5,7 +5,7 @@ from .email import db
 
 
 class EmailRecipient(db.Model):
-    """Model for storing email recipients (one-to-many relationship)."""
+    """Stores email recipients (one-to-many with EmailLog)."""
     __tablename__ = 'email_recipients'
     
     id = Column(Integer, primary_key=True)

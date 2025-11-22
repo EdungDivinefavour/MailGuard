@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get MailGuard running in 5 minutes.
+Get MailGuard running in a few minutes.
 
 ## Step 1: Setup
 
@@ -8,7 +8,7 @@ Get MailGuard running in 5 minutes.
 ./setup.sh
 ```
 
-This handles everything: virtual environment, dependencies, Tika server, and configuration.
+Creates the virtual environment, installs dependencies, starts Tika, and sets up the config.
 
 ## Step 2: Start MailGuard
 
@@ -20,7 +20,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 python main.py
 ```
 
-You should see:
+You should see something like:
 ```
 ✓ SMTP Proxy is listening on port 2525
 ✓ Ready to intercept emails...
@@ -30,34 +30,29 @@ MailGuard is running. Press Ctrl+C to stop.
 
 ## Step 3: Test It
 
-In a **new terminal** (keep the interceptor running):
+Open a new terminal (keep the first one running):
 
 ```bash
 source .venv/bin/activate
 python test_email.py
 ```
 
-Choose an option from the menu (e.g., option 2 for credit card test).
+Pick an option from the menu. Option 2 tests credit card detection.
 
 ## Step 4: View Results
 
-Open your browser to: `http://localhost:5001`
-
-You'll see:
-- Statistics (total emails, flagged, blocked)
-- Email logs with detection results
-- Policy actions applied
+Open `http://localhost:5001` in your browser. You'll see stats, email logs, detection results, and what actions were taken.
 
 ## That's It!
 
-The system is now intercepting and analyzing emails. Send more test emails or configure your mail client to use `localhost:2525` as the SMTP server.
+MailGuard is now intercepting and checking emails. Try sending more test emails or point your mail client to `localhost:2525`.
 
 ## Next Steps
 
-- **Configure your mail client**: Point SMTP to `localhost:2525`
-- **Customize policies**: Edit `mailguard/engines/policy_engine.py`
-- **Add detection patterns**: Edit `mailguard/engines/detection_engine.py`
-- **Review logs**: Check the dashboard regularly
+- Point your mail client's SMTP to `localhost:2525`
+- Tweak policies in `mailguard/engines/policy_engine.py`
+- Add detection patterns in `mailguard/engines/detection_engine.py`
+- Check the dashboard for intercepted emails
 
 ## Troubleshooting
 

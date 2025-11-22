@@ -1,4 +1,4 @@
-"""Configuration management for MailGuard."""
+"""Config settings for MailGuard."""
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    """Application configuration."""
+    """App configuration."""
     
     # SMTP Proxy
     PROXY_HOST = os.getenv('PROXY_HOST', '0.0.0.0')

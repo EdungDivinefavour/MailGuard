@@ -17,19 +17,18 @@ from ..models import db, EmailLog, EmailRecipient, EmailAttachment
 logger = logging.getLogger(__name__)
 
 class EmailHandler(Message):
-    """Handler for intercepted emails."""
+    """Handles intercepted emails."""
     
     def __init__(self, detection_engine: DetectionEngine, 
                  content_extractor: ContentExtractor,
                  policy_engine: PolicyEngine):
-        """Initialize email handler."""
         super().__init__()
         self.detection_engine = detection_engine
         self.content_extractor = content_extractor
         self.policy_engine = policy_engine
     
     def handle_message(self, message: EmailMessage):
-        """Process intercepted email message (aiosmtpd handler method - synchronous)."""
+        """Process intercepted email (synchronous aiosmtpd handler)."""
         start_time = time.time()
         
         try:
