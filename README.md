@@ -41,7 +41,7 @@ docker-compose logs -f mailguard-server
 
 **First time setup:** If you don't have a `.env` file, it will automatically create one from `.env.debug` with default settings. You can edit `.env` later if you need to change anything.
 
-### Step 3: Open the Apps
+### Step 2: Open the Apps
 
 Once everything is running, you'll see a bunch of logs in your terminal. When it's ready, open these in your browser:
 
