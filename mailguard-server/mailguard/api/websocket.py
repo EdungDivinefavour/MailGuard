@@ -1,27 +1,73 @@
 """WebSocket event handlers."""
 import logging
+from flask import request
 from flask_socketio import emit
 
 logger = logging.getLogger(__name__)
+
+# Track connected clients: {socket_id: {'ip': str, 'user_agent': str, 'connected_at': str}}
+connected_clients = {}
 
 
 def register_handlers(socketio_instance):
     """Register WebSocket handlers with the SocketIO instance."""
     
     @socketio_instance.on('connect')
-    def handle_connect():
+    def handle_connect(auth):
         """Handle WebSocket connection."""
-        logger.info('Client connected via WebSocket')
+        from datetime import datetime
+        
+        socket_id = request.sid
+        client_ip = request.remote_addr or request.environ.get('REMOTE_ADDR', 'unknown')
+        user_agent = request.headers.get('User-Agent', 'unknown')
+        connected_at = datetime.now().isoformat()
+        
+        # Store client information
+        connected_clients[socket_id] = {
+            'ip': client_ip,
+            'user_agent': user_agent,
+            'connected_at': connected_at
+        }
+        
+        logger.info(
+            f"✅ Client connected via WebSocket - "
+            f"Socket ID: {socket_id}, "
+            f"IP: {client_ip}, "
+            f"User-Agent: {user_agent[:50]}, "
+            f"Total connected clients: {len(connected_clients)}"
+        )
+        
         try:
-            emit('connected', {'status': 'connected'})
-            logger.info('Sent connected event to client')
+            emit('connected', {
+                'status': 'connected',
+                'socket_id': socket_id,
+                'total_clients': len(connected_clients)
+            })
+            logger.info(f"Sent connected event to client {socket_id}")
         except Exception as e:
             logger.error(f"Error emitting connect event: {e}")
 
     @socketio_instance.on('disconnect')
     def handle_disconnect():
         """Handle WebSocket disconnection."""
-        logger.info('Client disconnected from WebSocket')
+        socket_id = request.sid
+        
+        # Remove client from tracking
+        client_info = connected_clients.pop(socket_id, None)
+        
+        if client_info:
+            logger.info(
+                f"❌ Client disconnected from WebSocket - "
+                f"Socket ID: {socket_id}, "
+                f"IP: {client_info.get('ip', 'unknown')}, "
+                f"Total connected clients: {len(connected_clients)}"
+            )
+        else:
+            logger.info(
+                f"❌ Client disconnected from WebSocket - "
+                f"Socket ID: {socket_id} (not found in tracking), "
+                f"Total connected clients: {len(connected_clients)}"
+            )
 
 
 def emit_new_email(email_data):
@@ -30,11 +76,39 @@ def emit_new_email(email_data):
     
     if socketio is not None:
         try:
-            # With threading mode, we can emit directly without app context
+            # Get count of connected clients before emitting
+            client_count = len(connected_clients)
+            
+            # Broadcast to all connected clients
             socketio.emit('new_email', email_data, namespace='/')
-            logger.info(f"Emitted new_email event for email: {email_data.get('id', 'unknown')}")
+            
+            email_id = email_data.get('id', 'unknown')
+            email_subject = email_data.get('subject', 'no subject')
+            
+            logger.info(
+                f"📧 Emitted new_email event - "
+                f"Email ID: {email_id}, "
+                f"Subject: {email_subject[:50]}, "
+                f"Broadcasted to {client_count} connected client(s)"
+            )
+            
+            # Log client details if any are connected
+            if client_count > 0:
+                client_ids = list(connected_clients.keys())
+                logger.debug(
+                    f"   Connected clients: {client_ids[:5]}" + 
+                    (f" (and {len(client_ids) - 5} more)" if len(client_ids) > 5 else "")
+                )
         except Exception as e:
             logger.error(f"Error emitting new_email event: {e}", exc_info=True)
     else:
         logger.warning("SocketIO instance is None, cannot emit new_email event")
+
+
+def get_connected_clients():
+    """Get information about currently connected clients."""
+    return {
+        'count': len(connected_clients),
+        'clients': dict(connected_clients)
+    }
 

@@ -29,3 +29,15 @@ def get_stats():
         'avg_processing_time_ms': avg_time
     })
 
+
+@bp.route('/websocket-clients', methods=['GET'])
+def get_websocket_clients():
+    """Get information about currently connected WebSocket clients."""
+    try:
+        from ...api.websocket import get_connected_clients
+        clients_info = get_connected_clients()
+        return jsonify(clients_info)
+    except Exception as e:
+        logger.error(f"Error getting WebSocket clients: {e}", exc_info=True)
+        return jsonify({'error': str(e), 'count': 0, 'clients': {}}), 500
+
