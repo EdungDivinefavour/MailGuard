@@ -3,7 +3,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from workspace if it exists, otherwise from current directory
+workspace_env = Path('/workspace/.env')
+if workspace_env.exists():
+    load_dotenv(workspace_env)
+else:
+    load_dotenv()
 
 class Config:
     """App configuration."""

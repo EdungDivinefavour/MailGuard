@@ -41,7 +41,8 @@ function App() {
   useEffect(() => {
     if (!userEmail) return
 
-    const socket = io('http://localhost:5001', {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001'
+    const socket = io(apiUrl, {
       transports: ['websocket', 'polling']
     })
 

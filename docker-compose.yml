@@ -1,0 +1,81 @@
+services:
+  # Apache Tika for content extraction
+  tika:
+    image: apache/tika:latest
+    container_name: mailguard-tika
+    ports:
+      - "9998:9998"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9998/tika"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MailGuard Server (SMTP Proxy + Flask API)
+  mailguard-server:
+    build:
+      context: ./mailguard-server
+      dockerfile: Dockerfile
+    container_name: mailguard-server
+    ports:
+      - "2525:2525" # SMTP Proxy
+      - "5001:5001" # Flask API
+    environment:
+      - TIKA_SERVER_URL=http://tika:9998
+    volumes:
+      - .:/workspace
+      - ./mailguard-server/instance:/app/instance
+      - ./mailguard-server/attachments:/app/attachments
+      - ./mailguard-server/quarantine:/app/quarantine
+    depends_on:
+      tika:
+        condition: service_started
+    restart: unless-stopped
+    entrypoint: >
+      sh -c "
+      if [ ! -f /workspace/.env ]; then
+        if [ -f /workspace/.env.debug ]; then
+          echo 'Creating .env from .env.debug...'
+          cp /workspace/.env.debug /workspace/.env
+        fi
+      fi &&
+      cd /app &&
+      python main.py
+      "
+
+  # MailGuard Dashboard
+  mailguard-client:
+    build:
+      context: ./mailguard-client
+      dockerfile: Dockerfile
+    container_name: mailguard-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://mailguard-server:5001
+    volumes:
+      - ./mailguard-client:/app
+      - /app/node_modules
+    depends_on:
+      mailguard-server:
+        condition: service_started
+    restart: unless-stopped
+
+  # SMTP Email Client
+  smtp-client:
+    build:
+      context: ./smtp-client
+      dockerfile: Dockerfile
+    container_name: smtp-email-client
+    ports:
+      - "3001:3001"
+    environment:
+      - VITE_API_URL=http://mailguard-server:5001
+    volumes:
+      - ./smtp-client:/app
+      - /app/node_modules
+    depends_on:
+      mailguard-server:
+        condition: service_started
+    restart: unless-stopped

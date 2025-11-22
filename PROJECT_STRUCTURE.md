@@ -1,6 +1,6 @@
 # Project Structure
 
-This document describes the reorganized project structure.
+This document describes the project structure.
 
 ## Directory Layout
 
@@ -15,12 +15,11 @@ email_interceptor/
 │   ├── app.py             # Flask API server
 │   ├── main.py            # Main entry point (starts proxy + Flask)
 │   ├── requirements.txt   # Python dependencies
-│   ├── setup.sh           # Setup script (venv, deps, Tika)
+│   ├── Dockerfile         # Docker image definition
 │   ├── test_email.py      # Test script
-│   ├── docker-compose.yml # Docker config for Tika
-│   ├── instance/          # Database files
-│   ├── attachments/       # Stored email attachments
-│   ├── quarantine/        # Quarantined emails
+│   ├── instance/          # Database files (mounted as volume)
+│   ├── attachments/       # Stored email attachments (mounted as volume)
+│   ├── quarantine/        # Quarantined emails (mounted as volume)
 │   └── test_emails/       # Test email files
 │
 ├── mailguard-client/       # MailGuard Dashboard (React)
@@ -28,7 +27,7 @@ email_interceptor/
 │   │   ├── components/    # React components
 │   │   ├── App.jsx        # Main app
 │   │   └── main.jsx       # Entry point
-│   ├── setup.sh           # Setup script (npm install)
+│   ├── Dockerfile         # Docker image definition
 │   ├── package.json
 │   └── vite.config.js
 │
@@ -37,12 +36,12 @@ email_interceptor/
 │   │   ├── components/    # Email client components
 │   │   ├── App.jsx        # Main app
 │   │   └── main.jsx       # Entry point
-│   ├── setup.sh           # Setup script (npm install)
+│   ├── Dockerfile         # Docker image definition
 │   ├── package.json
 │   └── vite.config.js
 │
-├── start.sh               # Main startup script (sets up and starts all services)
-└── start.ps1              # Windows startup script
+├── docker-compose.yml     # Docker Compose orchestration (all services)
+└── .dockerignore          # Files to exclude from Docker builds
 ```
 
 ## Applications
@@ -53,59 +52,61 @@ email_interceptor/
   - SMTP Proxy: 2525
   - Flask API: 5001
 - **Technology**: Python, Flask, SQLAlchemy
-- **Location**: All server code is in `mailguard-server/` directory
+- **Container**: `mailguard-server`
 
 ### 2. MailGuard Dashboard (`mailguard-client/`)
 - **Purpose**: Admin dashboard to view intercepted emails and stats
 - **Port**: 3000
 - **Technology**: React, Vite
 - **Access**: `http://localhost:3000`
+- **Container**: `mailguard-dashboard`
 
 ### 3. SMTP Email Client (`smtp-client/`)
 - **Purpose**: Email client for users to send/receive emails
 - **Port**: 3001
 - **Technology**: React, Vite
 - **Access**: `http://localhost:3001`
+- **Container**: `smtp-email-client`
+
+### 4. Apache Tika (`tika`)
+- **Purpose**: Content extraction from attachments
+- **Port**: 9998
+- **Container**: `mailguard-tika`
 
 ## Running the Project
 
-### Quick Start (All Services)
+### Quick Start with Docker
+
 ```bash
-./start.sh
+docker-compose up --build
 ```
+
 This will:
-- Set up all three projects (if needed)
-- Start all services
-- Show server logs in the current terminal
+- Build all Docker images
+- Start all services (Tika, Server, Dashboard, Email Client)
+- Set up networking between services
+- Persist data in volumes
 
-### Manual Setup and Start
+**Access the services:**
+- SMTP Proxy: `localhost:2525`
+- Flask API: `http://localhost:5001`
+- Dashboard: `http://localhost:3000`
+- Email Client: `http://localhost:3001`
 
-#### 1. Setup and Start Server
+**Stop all services:**
 ```bash
-cd mailguard-server
-./setup.sh          # First time setup
-source .venv/bin/activate
-python main.py
+docker-compose down
 ```
-This starts:
-- SMTP proxy on port 2525
-- Flask API on port 5001
 
-#### 2. Setup and Start MailGuard Dashboard
+**View logs:**
 ```bash
-cd mailguard-client
-./setup.sh          # First time setup
-npm run dev
+docker-compose logs -f
 ```
-Access at: `http://localhost:3000`
 
-#### 3. Setup and Start Email Client
+**Start without rebuilding (if images already exist):**
 ```bash
-cd smtp-client
-./setup.sh          # First time setup
-npm run dev
+docker-compose up
 ```
-Access at: `http://localhost:3001`
 
 ## API Endpoints
 
@@ -130,10 +131,12 @@ All endpoints are prefixed with `/api`:
 
 ## Notes
 
+- All services run as Docker containers orchestrated by `docker-compose.yml`
 - Both React apps proxy API requests to Flask (port 5001)
 - The SMTP proxy intercepts all emails sent through it
 - All emails are logged to the same SQLite database
 - CORS is enabled on Flask to allow both React apps to access APIs
-- Email attachments are stored in `mailguard-server/attachments/`
-- Each project has its own `setup.sh` script for easy setup
-- The main `start.sh` script orchestrates setup and startup of all services
+- Email attachments are stored in `mailguard-server/attachments/` (persisted via Docker volume)
+- Database and attachments are persisted via Docker volumes
+- Services communicate via Docker's internal network
+- Hot reload is enabled for development (source code mounted as volumes)
