@@ -8,11 +8,9 @@ from threading import Thread
 from mailguard.config import Config
 from mailguard.proxy import SMTPProxy
 from mailguard.api import create_app, init_db
-from mailguard.services.websocket.notifier import set_flask_app
 
 app = create_app()
 from mailguard.api import socketio
-set_flask_app(app)
 
 logging.basicConfig(
     level=logging.INFO,

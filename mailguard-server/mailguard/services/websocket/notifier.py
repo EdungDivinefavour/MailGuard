@@ -5,14 +5,6 @@ from ...models import EmailLog
 
 logger = logging.getLogger(__name__)
 
-_flask_app = None
-
-
-def set_flask_app(app):
-    """Set Flask app for WebSocket emissions."""
-    global _flask_app
-    _flask_app = app
-
 
 class WebSocketNotifier:
     """Handles WebSocket notifications for real-time updates."""

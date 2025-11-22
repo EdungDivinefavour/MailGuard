@@ -27,22 +27,11 @@ def register_handlers(socketio_instance):
 def emit_new_email(email_data):
     """Emit a new email event to all connected clients."""
     from . import socketio
-    from flask import has_app_context
     
     if socketio is not None:
         try:
-            # If we're in an app context, use it; otherwise emit without context
-            if has_app_context():
-                socketio.emit('new_email', email_data, namespace='/')
-            else:
-                # Try to get the app from the notifier's stored app
-                from ..services.websocket.notifier import _flask_app
-                if _flask_app:
-                    with _flask_app.app_context():
-                        socketio.emit('new_email', email_data, namespace='/')
-                else:
-                    # Fallback: emit without context (should work with threading mode)
-                    socketio.emit('new_email', email_data, namespace='/')
+            # With threading mode, we can emit directly without app context
+            socketio.emit('new_email', email_data, namespace='/')
             logger.info(f"Emitted new_email event for email: {email_data.get('id', 'unknown')}")
         except Exception as e:
             logger.error(f"Error emitting new_email event: {e}", exc_info=True)
