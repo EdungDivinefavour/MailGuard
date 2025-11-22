@@ -29,19 +29,22 @@ def register_handlers(socketio_instance):
             'connected_at': connected_at
         }
         
+        all_client_ids = list(connected_clients.keys())
         logger.info(
             f"✅ Client connected via WebSocket - "
             f"Socket ID: {socket_id}, "
             f"IP: {client_ip}, "
             f"User-Agent: {user_agent[:50]}, "
-            f"Total connected clients: {len(connected_clients)}"
+            f"Total connected clients: {len(connected_clients)} - "
+            f"All Socket IDs: {all_client_ids}"
         )
         
         try:
             emit('connected', {
                 'status': 'connected',
                 'socket_id': socket_id,
-                'total_clients': len(connected_clients)
+                'total_clients': len(connected_clients),
+                'connected_socket_ids': all_client_ids
             })
             logger.info(f"Sent connected event to client {socket_id}")
         except Exception as e:
@@ -55,18 +58,21 @@ def register_handlers(socketio_instance):
         # Remove client from tracking
         client_info = connected_clients.pop(socket_id, None)
         
+        remaining_client_ids = list(connected_clients.keys())
         if client_info:
             logger.info(
                 f"❌ Client disconnected from WebSocket - "
                 f"Socket ID: {socket_id}, "
                 f"IP: {client_info.get('ip', 'unknown')}, "
-                f"Total connected clients: {len(connected_clients)}"
+                f"Total connected clients: {len(connected_clients)} - "
+                f"Remaining Socket IDs: {remaining_client_ids}"
             )
         else:
             logger.info(
                 f"❌ Client disconnected from WebSocket - "
                 f"Socket ID: {socket_id} (not found in tracking), "
-                f"Total connected clients: {len(connected_clients)}"
+                f"Total connected clients: {len(connected_clients)} - "
+                f"Remaining Socket IDs: {remaining_client_ids}"
             )
 
 
@@ -85,20 +91,16 @@ def emit_new_email(email_data):
             email_id = email_data.get('id', 'unknown')
             email_subject = email_data.get('subject', 'no subject')
             
+            # Get all client IDs for logging
+            client_ids = list(connected_clients.keys())
+            
             logger.info(
                 f"📧 Emitted new_email event - "
                 f"Email ID: {email_id}, "
                 f"Subject: {email_subject[:50]}, "
-                f"Broadcasted to {client_count} connected client(s)"
+                f"Broadcasted to {client_count} connected client(s) - "
+                f"Socket IDs: {client_ids}"
             )
-            
-            # Log client details if any are connected
-            if client_count > 0:
-                client_ids = list(connected_clients.keys())
-                logger.debug(
-                    f"   Connected clients: {client_ids[:5]}" + 
-                    (f" (and {len(client_ids) - 5} more)" if len(client_ids) > 5 else "")
-                )
         except Exception as e:
             logger.error(f"Error emitting new_email event: {e}", exc_info=True)
     else:
