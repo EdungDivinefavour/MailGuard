@@ -17,7 +17,7 @@ class SMTPProxy:
         
         Args:
             app_context: Flask application context (optional, for database access)
-            flask_app: Flask application instance (for SSE notifications)
+            flask_app: Flask application instance (for database access)
         """
         self.detection_engine = DetectionEngine(
             use_presidio=Config.USE_PRESIDIO
@@ -53,15 +53,7 @@ class SMTPProxy:
         
         logger.info(f"Starting SMTP proxy on {Config.PROXY_HOST}:{Config.PROXY_PORT}")
         logger.info(f"Forwarding to {Config.UPSTREAM_SMTP_HOST}:{Config.UPSTREAM_SMTP_PORT}")
-        print(f"\n{'='*60}")
-        print(f"✓ SMTP Proxy is listening on port {Config.PROXY_PORT}")
-        print(f"✓ Ready to intercept emails...")
-        print(f"✓ Handler type: {type(handler).__name__}")
-        print(f"{'='*60}\n")
-        
         self.controller.start()
-        print(f"[DEBUG] Controller started: {self.controller}")
-        print(f"[DEBUG] Controller running: {self.controller._thread.is_alive() if hasattr(self.controller, '_thread') else 'N/A'}\n")
     
     def stop(self):
         """Stop the SMTP proxy server."""

@@ -10,7 +10,7 @@ class WebSocketNotifier:
     """Handles SSE notifications (kept name for compatibility)."""
     
     def __init__(self, flask_app=None):
-        self.flask_app = flask_app
+        pass
     
     def notify_new_email(self, email_log: EmailLog):
         """Notify clients about a new email via SSE."""

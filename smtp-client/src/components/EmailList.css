@@ -88,6 +88,29 @@
     border-left: 3px solid #667eea;
 }
 
+.email-item-new {
+    animation: slideInHighlight 0.6s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideInHighlight {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
+        background: #e3f2fd;
+    }
+
+    50% {
+        background: #e3f2fd;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+        background: transparent;
+    }
+}
+
 .email-item-header {
     display: flex;
     justify-content: space-between;
@@ -132,4 +155,3 @@
     text-align: center;
     color: #999;
 }
-

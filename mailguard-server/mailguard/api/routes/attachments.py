@@ -68,16 +68,11 @@ def send_email():
         
         # Send via SMTP proxy
         try:
-            logger.info(f"📤 Sending email via SMTP proxy - From: {from_email}, To: {to_email}, Subject: {subject}")
-            logger.info(f"📤 Connecting to SMTP proxy at {Config.PROXY_HOST}:{Config.PROXY_PORT}")
             with smtplib.SMTP(Config.PROXY_HOST, Config.PROXY_PORT) as server:
-                logger.info(f"📤 SMTP connection established, sending message...")
                 server.send_message(msg)
-                logger.info(f"📤 Message sent successfully via SMTP proxy")
-            logger.info(f"✅ Email sent from {from_email} to {to_email} - should be intercepted and processed by proxy")
             return jsonify({'success': True, 'message': 'Email sent successfully'})
         except Exception as e:
-            logger.error(f"❌ Failed to send email: {e}", exc_info=True)
+            logger.error(f"Failed to send email: {e}", exc_info=True)
             return jsonify({'error': f'Failed to send email: {str(e)}'}), 500
             
     except Exception as e:

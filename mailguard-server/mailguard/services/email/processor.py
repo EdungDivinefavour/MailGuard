@@ -30,15 +30,13 @@ class EmailProcessor(Message):
         self.attachment_storage = AttachmentStorage()
         self.email_repository = EmailRepository(flask_app=flask_app)
         self.smtp_forwarder = SMTPForwarder()
-        self.websocket_notifier = WebSocketNotifier(flask_app=flask_app)
-        self.flask_app = flask_app
+        self.websocket_notifier = WebSocketNotifier()
     
     def handle_message(self, message: EmailMessage):
         """Process intercepted email (synchronous aiosmtpd handler)."""
         start_time = time.time()
         
         try:
-            self._log_debug_info(message)
             metadata = self._extract_metadata(message)
             body_text = self._extract_body_text(message)
             attachment_texts, attachment_data, attachment_count = self._process_attachments(message)
@@ -68,12 +66,7 @@ class EmailProcessor(Message):
             )
             
             if email_log:
-                print(f"✓ Email logged to database (ID: {email_log.id})")
-                print(f"   View in dashboard: http://localhost:{Config.FLASK_PORT}")
-                print(f"{'='*60}\n")
-                logger.info(f"📧 EmailProcessor: Email saved with ID {email_log.id}, notifying SSE clients...")
                 self.websocket_notifier.notify_new_email(email_log)
-                logger.info(f"📧 EmailProcessor: SSE notification sent for email ID {email_log.id}")
             
             # Handle based on policy decision
             message_to_send = self._get_message_to_send(policy_decision, message)
@@ -86,12 +79,6 @@ class EmailProcessor(Message):
             if error_log:
                 self.websocket_notifier.notify_new_email(error_log)
     
-    def _log_debug_info(self, message: EmailMessage):
-        """Log debug information about the message."""
-        print(f"\n[DEBUG] handle_message called")
-        print(f"[DEBUG] Message type: {type(message)}")
-        print(f"[DEBUG] Message headers: {list(message.keys())}")
-    
     def _extract_metadata(self, message: EmailMessage) -> dict:
         """Extract metadata from email message."""
         message_id = message.get('Message-ID', f'<{time.time()}@proxy>')
@@ -99,12 +86,6 @@ class EmailProcessor(Message):
         recipients = message.get_all('To', []) + message.get_all('Cc', []) + message.get_all('Bcc', [])
         subject = message.get('Subject', '(no subject)')
         
-        print(f"\n{'='*60}")
-        print(f"📧 EMAIL INTERCEPTED")
-        print(f"{'='*60}")
-        print(f"From: {sender}")
-        print(f"To: {', '.join(str(r) for r in recipients[:3])}")
-        print(f"Subject: {subject}")
         logger.info(f"Email intercepted: {subject} from {sender}")
         
         return {
@@ -166,18 +147,14 @@ class EmailProcessor(Message):
             return ""
     
     def _print_detection_results(self, detections):
-        """Print detection results to console."""
+        """Log detection results."""
         if detections:
-            print(f"\n⚠️  SENSITIVE DATA DETECTED:")
             for det in detections:
-                print(f"   - {det.pattern_type}: '{det.matched_text}' (confidence: {det.confidence:.2f})")
-        else:
-            print(f"\n✓ No sensitive data detected")
+                logger.info(f"Detected {det.pattern_type}: '{det.matched_text}' (confidence: {det.confidence:.2f})")
     
     def _print_policy_decision(self, policy_decision):
-        """Print policy decision to console."""
-        print(f"\n📋 Policy Decision: {policy_decision.action.upper()}")
-        print(f"   Reason: {policy_decision.reason}")
+        """Log policy decision."""
+        logger.info(f"Policy decision: {policy_decision.action.upper()} - {policy_decision.reason}")
     
     def _get_message_to_send(self, policy_decision, message: EmailMessage) -> EmailMessage:
         """Determine which message to send based on policy decision."""

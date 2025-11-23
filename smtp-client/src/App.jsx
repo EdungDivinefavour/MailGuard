@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Sidebar from './components/Sidebar'
 import EmailList from './components/EmailList'
 import EmailView from './components/EmailView'
@@ -16,6 +16,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [newEmailIds, setNewEmailIds] = useState(new Set())
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('userEmail')
@@ -36,6 +37,35 @@ function App() {
     }
   }, [userEmail, currentView])
 
+  const handleNewEmail = useCallback((newEmail) => {
+    // Check if email matches current view filter
+    const matchesView = currentView === 'inbox'
+      ? newEmail.recipients && newEmail.recipients.some(r => r.toLowerCase().includes(userEmail.toLowerCase()))
+      : newEmail.sender && newEmail.sender.toLowerCase().includes(userEmail.toLowerCase())
+
+    if (matchesView) {
+      setEmails(prevEmails => {
+        // Check if email already exists (avoid duplicates)
+        if (prevEmails.some(e => e.id === newEmail.id)) {
+          return prevEmails
+        }
+        // Add new email at the top (emails are sorted by timestamp desc)
+        const updated = [newEmail, ...prevEmails]
+        // Mark as new for animation
+        setNewEmailIds(prev => new Set([...prev, newEmail.id]))
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          setNewEmailIds(prev => {
+            const next = new Set(prev)
+            next.delete(newEmail.id)
+            return next
+          })
+        }, 600) // Match animation duration
+        return updated
+      })
+    }
+  }, [currentView, userEmail])
+
   useEffect(() => {
     if (!userEmail) return
 
@@ -43,40 +73,27 @@ function App() {
       ? `${API_URL}/api/events/stream`
       : '/api/events/stream'
 
-    console.log('Connecting to SSE stream:', eventSourceUrl)
     const eventSource = new EventSource(eventSourceUrl)
-
-    eventSource.onopen = () => {
-      console.log('✅ SSE connection opened')
-    }
 
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        console.log('SSE event received:', data)
-
-        if (data.type === 'connected') {
-          console.log('SSE connected, client ID:', data.client_id)
-        } else if (data.type === 'new_email') {
-          console.log('New email received via SSE, reloading...')
-          loadEmails()
+        if (data.type === 'new_email' && data.data) {
+          handleNewEmail(data.data)
         }
       } catch (error) {
-        console.error('Error parsing SSE event:', error, event.data)
+        console.error('Error parsing SSE event:', error)
       }
     }
 
     eventSource.onerror = (error) => {
-      console.error('❌ SSE error:', error)
-      // EventSource will automatically reconnect
+      console.error('SSE connection error:', error)
     }
 
     return () => {
-      console.log('🔌 Closing SSE connection...')
       eventSource.close()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userEmail])
+  }, [userEmail, handleNewEmail])
 
   const loadEmails = async () => {
     setLoading(true)
@@ -87,8 +104,6 @@ function App() {
       const response = await fetch(apiPath)
 
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`API error (${response.status}):`, errorText)
         setToast({ message: `Failed to load emails: ${response.status} ${response.statusText}`, type: 'error' })
         setEmails([])
         return
@@ -96,8 +111,6 @@ function App() {
 
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text()
-        console.error('Response is not JSON:', text.substring(0, 100))
         setToast({ message: 'Server returned invalid response format', type: 'error' })
         setEmails([])
         return
@@ -188,6 +201,7 @@ function App() {
               loading={loading}
               currentView={currentView}
               onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+              newEmailIds={newEmailIds}
             />
             {selectedEmail && (
               <EmailView

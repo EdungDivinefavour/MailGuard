@@ -1,31 +1,31 @@
 import { FiMenu } from 'react-icons/fi'
 import './EmailList.css'
 
-function EmailList({ emails, selectedEmail, onEmailSelect, loading, currentView, onMenuClick }) {
+function EmailList({ emails, selectedEmail, onEmailSelect, loading, currentView, onMenuClick, newEmailIds = new Set() }) {
   const formatDate = (dateString) => {
     try {
       if (!dateString) return 'Unknown'
-      
+
       // Handle ISO format strings
       const date = new Date(dateString)
-      
+
       // Check if date is valid
       if (isNaN(date.getTime())) {
         return dateString
       }
-      
+
       const now = new Date()
       const diffMs = now - date
-      
+
       // If negative, it's in the future (shouldn't happen, but handle it)
       if (diffMs < 0) {
         return date.toLocaleDateString()
       }
-      
+
       const diffMins = Math.floor(diffMs / 60000)
       const diffHours = Math.floor(diffMs / 3600000)
       const diffDays = Math.floor(diffMs / 86400000)
-      
+
       if (diffMins < 1) return 'just now'
       if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`
       if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
@@ -73,13 +73,13 @@ function EmailList({ emails, selectedEmail, onEmailSelect, loading, currentView,
           emails.map((email) => (
             <div
               key={email.id}
-              className={`email-item ${selectedEmail?.id === email.id ? 'selected' : ''}`}
+              className={`email-item ${selectedEmail?.id === email.id ? 'selected' : ''} ${newEmailIds.has(email.id) ? 'email-item-new' : ''}`}
               onClick={() => onEmailSelect(email)}
             >
               <div className="email-item-header">
                 <div className="email-sender">
-                  {currentView === 'inbox' ? email.sender : 
-                   (email.recipients && email.recipients[0]) || 'Unknown'}
+                  {currentView === 'inbox' ? email.sender :
+                    (email.recipients && email.recipients[0]) || 'Unknown'}
                 </div>
                 <div className="email-date">{formatDate(email.timestamp)}</div>
               </div>
