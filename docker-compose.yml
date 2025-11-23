@@ -21,13 +21,18 @@ services:
     ports:
       - "2525:2525" # SMTP Proxy
       - "5001:5001" # Flask API
+      - "5678:5678" # Debugpy remote debugging
     environment:
       - TIKA_SERVER_URL=http://tika:9998
+      - FLASK_DEBUG=true
+      - DEBUG_MODE=${DEBUG_MODE:-false}
     volumes:
       - .:/workspace
-      - ./mailguard-server/instance:/app/instance
-      - ./mailguard-server/attachments:/app/attachments
-      - ./mailguard-server/quarantine:/app/quarantine
+      - ./mailguard-server:/app
+      - mailguard-server-cache:/app/__pycache__
+      - mailguard-server-instance:/app/instance
+      - mailguard-server-attachments:/app/attachments
+      - mailguard-server-quarantine:/app/quarantine
     depends_on:
       tika:
         condition: service_started
@@ -79,3 +84,9 @@ services:
       mailguard-server:
         condition: service_started
     restart: unless-stopped
+
+volumes:
+  mailguard-server-cache:
+  mailguard-server-instance:
+  mailguard-server-attachments:
+  mailguard-server-quarantine:

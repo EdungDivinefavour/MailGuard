@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { io } from 'socket.io-client'
 import Sidebar from './components/Sidebar'
 import EmailList from './components/EmailList'
 import EmailView from './components/EmailView'
@@ -40,53 +39,41 @@ function App() {
   useEffect(() => {
     if (!userEmail) return
 
-    // Use relative path if API_URL is empty (will go through Vite proxy)
-    // Otherwise use the full URL
-    const socketUrl = API_URL || window.location.origin
-    console.log('🔌 Connecting to WebSocket at:', socketUrl)
-    const socket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
-      path: '/socket.io',
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5
-    })
+    const eventSourceUrl = API_URL
+      ? `${API_URL}/api/events/stream`
+      : '/api/events/stream'
 
-    socket.on('connect', () => {
-      console.log('✅ Connected to WebSocket server, socket ID:', socket.id)
-    })
+    console.log('Connecting to SSE stream:', eventSourceUrl)
+    const eventSource = new EventSource(eventSourceUrl)
 
-    socket.on('connected', (data) => {
-      console.log('✅ WebSocket connection confirmed:', data)
-    })
+    eventSource.onopen = () => {
+      console.log('✅ SSE connection opened')
+    }
 
-    socket.onAny((eventName, ...args) => {
-      console.log('🔔 Socket event received:', eventName, args)
-    })
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        console.log('SSE event received:', data)
 
-    socket.on('new_email', (emailData) => {
-      console.log('📧 New email event received:', emailData)
-      console.log('Current view:', currentView, 'User email:', userEmail)
+        if (data.type === 'connected') {
+          console.log('SSE connected, client ID:', data.client_id)
+        } else if (data.type === 'new_email') {
+          console.log('New email received via SSE, reloading...')
+          loadEmails()
+        }
+      } catch (error) {
+        console.error('Error parsing SSE event:', error, event.data)
+      }
+    }
 
-      console.log('🔄 Reloading emails due to new email event...')
-      loadEmails()
-    })
-
-    socket.on('error', (error) => {
-      console.error('❌ WebSocket error:', error)
-    })
-
-    socket.on('disconnect', (reason) => {
-      console.log('Disconnected from WebSocket server:', reason)
-    })
-
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Reconnected to WebSocket server after', attemptNumber, 'attempts')
-    })
+    eventSource.onerror = (error) => {
+      console.error('❌ SSE error:', error)
+      // EventSource will automatically reconnect
+    }
 
     return () => {
-      console.log('🔌 Disconnecting WebSocket...')
-      socket.disconnect()
+      console.log('🔌 Closing SSE connection...')
+      eventSource.close()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail])

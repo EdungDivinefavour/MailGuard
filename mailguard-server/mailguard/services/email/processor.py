@@ -30,7 +30,8 @@ class EmailProcessor(Message):
         self.attachment_storage = AttachmentStorage()
         self.email_repository = EmailRepository(flask_app=flask_app)
         self.smtp_forwarder = SMTPForwarder()
-        self.websocket_notifier = WebSocketNotifier()
+        self.websocket_notifier = WebSocketNotifier(flask_app=flask_app)
+        self.flask_app = flask_app
     
     def handle_message(self, message: EmailMessage):
         """Process intercepted email (synchronous aiosmtpd handler)."""
@@ -70,7 +71,9 @@ class EmailProcessor(Message):
                 print(f"✓ Email logged to database (ID: {email_log.id})")
                 print(f"   View in dashboard: http://localhost:{Config.FLASK_PORT}")
                 print(f"{'='*60}\n")
+                logger.info(f"📧 EmailProcessor: Email saved with ID {email_log.id}, notifying SSE clients...")
                 self.websocket_notifier.notify_new_email(email_log)
+                logger.info(f"📧 EmailProcessor: SSE notification sent for email ID {email_log.id}")
             
             # Handle based on policy decision
             message_to_send = self._get_message_to_send(policy_decision, message)

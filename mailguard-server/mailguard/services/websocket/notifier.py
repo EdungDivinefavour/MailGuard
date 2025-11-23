@@ -1,4 +1,4 @@
-"""WebSocket notification service."""
+"""SSE notification service."""
 import logging
 
 from ...models import EmailLog
@@ -7,24 +7,20 @@ logger = logging.getLogger(__name__)
 
 
 class WebSocketNotifier:
-    """Handles WebSocket notifications for real-time updates."""
+    """Handles SSE notifications (kept name for compatibility)."""
     
-    def __init__(self):
-        """Initialize WebSocket notifier."""
-        pass
+    def __init__(self, flask_app=None):
+        self.flask_app = flask_app
     
     def notify_new_email(self, email_log: EmailLog):
-        """
-        Emit WebSocket update for new email.
-        
-        Args:
-            email_log: EmailLog object to notify about
-        """
+        """Notify clients about a new email via SSE."""
         try:
-            from ...api.websocket import emit_new_email
-            
+            from ...api.routes.events import add_event
             email_data = email_log.to_dict()
-            emit_new_email(email_data)
-        except Exception as ws_err:
-            logger.error(f"Could not emit WebSocket event: {ws_err}", exc_info=True)
+            add_event({
+                'type': 'new_email',
+                'data': email_data
+            })
+        except Exception as e:
+            logger.error(f"Failed to emit SSE event: {e}", exc_info=True)
 

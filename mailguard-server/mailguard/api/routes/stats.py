@@ -30,14 +30,40 @@ def get_stats():
     })
 
 
-@bp.route('/websocket-clients', methods=['GET'])
-def get_websocket_clients():
-    """Get information about currently connected WebSocket clients."""
+@bp.route('/sse-clients', methods=['GET'])
+def get_sse_clients():
+    """Get information about currently connected SSE clients."""
     try:
-        from ...api.websocket import get_connected_clients
-        clients_info = get_connected_clients()
-        return jsonify(clients_info)
+        from .events import _client_queues, _clients_lock
+        with _clients_lock:
+            count = len(_client_queues)
+        return jsonify({'count': count})
     except Exception as e:
-        logger.error(f"Error getting WebSocket clients: {e}", exc_info=True)
-        return jsonify({'error': str(e), 'count': 0, 'clients': {}}), 500
+        logger.error(f"Error getting SSE clients: {e}", exc_info=True)
+        return jsonify({'error': str(e), 'count': 0}), 500
+
+
+@bp.route('/test-sse', methods=['POST'])
+def test_sse():
+    """Test endpoint to manually trigger an SSE event."""
+    try:
+        from .events import add_event
+        
+        test_data = {
+            'type': 'new_email',
+            'data': {
+                'id': 'test',
+                'subject': 'Test SSE Event',
+                'sender': 'test@example.com',
+                'recipients': ['test@example.com'],
+                'body': 'This is a test event'
+            }
+        }
+        
+        add_event(test_data)
+        
+        return jsonify({'success': True, 'message': 'Test event emitted'})
+    except Exception as e:
+        logger.error(f"Error in test_sse: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 

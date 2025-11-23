@@ -18,7 +18,7 @@ class EmailRepository:
         """Initialize email repository.
         
         Args:
-            flask_app: Flask application instance (for database context and WebSocket)
+            flask_app: Flask application instance (for database context)
         """
         self.flask_app = flask_app
     

@@ -1,16 +1,25 @@
 """Main entry point for MailGuard."""
 import logging
+import os
 import signal
 import sys
 import time
 from threading import Thread
+
+# Enable remote debugging if DEBUG_MODE is set
+if os.getenv('DEBUG_MODE', 'false').lower() == 'true':
+    import debugpy
+    debugpy.listen(('0.0.0.0', 5678))
+    print("🐛 Debugpy listening on port 5678. Waiting for debugger to attach...")
+    # Uncomment the next line to wait for debugger before starting
+    # debugpy.wait_for_client()
+    print("🐛 Debugger attached!")
 
 from mailguard.config import Config
 from mailguard.proxy import SMTPProxy
 from mailguard.api import create_app, init_db
 
 app = create_app()
-from mailguard.api import socketio
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,7 +34,12 @@ logger = logging.getLogger(__name__)
 
 def run_flask():
     """Run Flask in a separate thread."""
-    socketio.run(app, host=Config.FLASK_HOST, port=Config.FLASK_PORT, debug=Config.FLASK_DEBUG, allow_unsafe_werkzeug=True)
+    app.run(
+        host=Config.FLASK_HOST, 
+        port=Config.FLASK_PORT, 
+        debug=Config.FLASK_DEBUG,
+        use_reloader=False  # Disable reloader when running in a thread
+    )
 
 def main():
     """Start the proxy and UI."""

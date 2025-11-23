@@ -17,7 +17,7 @@ class SMTPProxy:
         
         Args:
             app_context: Flask application context (optional, for database access)
-            flask_app: Flask application instance (for WebSocket emissions)
+            flask_app: Flask application instance (for SSE notifications)
         """
         self.detection_engine = DetectionEngine(
             use_presidio=Config.USE_PRESIDIO
