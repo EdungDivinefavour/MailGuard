@@ -2,23 +2,6 @@
 
 ## Common Issues and Solutions
 
-### spaCy Model Installation Fails
-
-**Error**: `HTTP error 404` or `Could not install requirement`
-
-**Solution**: spaCy is optional. Everything works fine without it.
-
-1. Skip spaCy during setup (choose 'n' when asked)
-2. Disable it in `.env`: `ENABLE_SPACY=false`
-3. Install it manually later if you want:
-   ```bash
-   cd mailguard-server
-   source .venv/bin/activate
-   python -m spacy download en_core_web_sm
-   ```
-
-Regex detection (credit cards, SIN, SSN, emails) works without spaCy.
-
 ### Docker/Tika Not Available
 
 **Error**: `docker-compose: command not found`
@@ -28,7 +11,7 @@ Regex detection (credit cards, SIN, SSN, emails) works without spaCy.
 2. Start Docker
 3. Run: `cd mailguard-server && docker-compose up -d`
 
-You can test without Tika for basic email body detection, but attachment extraction needs Tika.
+You can test without Tika for basic email body detection, but you'll need it for attachment extraction.
 
 ### Port Already in Use
 
@@ -44,10 +27,9 @@ FLASK_PORT=5001
 
 **Error**: `OperationalError` or database locked
 
-**Solution**:
+**Solution**: Reset the database (warning: this deletes all logs):
 ```bash
 cd mailguard-server
-# Reset database (this deletes all logs)
 rm instance/mailguard.db
 source .venv/bin/activate
 python main.py  # Creates a new database
@@ -123,18 +105,18 @@ pip install -r requirements.txt
 
 ## Getting Help
 
-If something else breaks:
+Something else broken? Try these:
 
 1. Check the logs: `mailguard.log`
-2. Try sending a test email: `python test_email.py`
-3. Make sure everything is running:
+2. Send a test email: `python test_email.py`
+3. Make sure everything's actually running:
    - Tika: `curl http://localhost:9998/tika`
    - Proxy: check terminal output
    - Flask: check terminal output
 
 ## Quick Health Check
 
-Run these to make sure everything's set up:
+Run these to verify everything's set up:
 
 ```bash
 # Check Python

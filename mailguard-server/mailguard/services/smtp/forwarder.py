@@ -13,7 +13,6 @@ class SMTPForwarder:
     """Handles forwarding emails via SMTP."""
     
     def __init__(self):
-        """Initialize SMTP forwarder."""
         pass
     
     def forward(self, message: EmailMessage) -> bool:
@@ -26,22 +25,18 @@ class SMTPForwarder:
         Returns:
             True if successful, False otherwise
         """
-        # Skip forwarding if upstream SMTP is not configured (for testing)
         if Config.UPSTREAM_SMTP_HOST == 'smtp.example.com':
             logger.info("Skipping forward - upstream SMTP not configured (OK for testing)")
             return True
         
         try:
-            # Remove Bcc header before forwarding
             if 'Bcc' in message:
                 del message['Bcc']
             
-            # Extract sender
             sender = parseaddr(message.get('From', ''))[1]
             if not sender:
                 sender = "no-reply@proxy"
             
-            # Extract recipients
             recipients = []
             for header in ['To', 'Cc']:
                 addrs = message.get_all(header, [])
@@ -54,7 +49,6 @@ class SMTPForwarder:
                 logger.warning("No recipients found, skipping forward")
                 return False
             
-            # Send using sendmail
             with smtplib.SMTP(Config.UPSTREAM_SMTP_HOST, Config.UPSTREAM_SMTP_PORT) as server:
                 server.sendmail(sender, recipients, message.as_string())
                 logger.info(f"Message forwarded to {len(recipients)} recipient(s)")

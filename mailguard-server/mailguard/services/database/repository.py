@@ -2,7 +2,7 @@
 import logging
 import os
 import sys
-from typing import List, Dict, Optional
+from typing import List, Optional
 from email.message import EmailMessage
 
 from ...models import db, EmailLog, EmailRecipient, EmailAttachment
@@ -57,7 +57,6 @@ class EmailRepository:
                 processing_time_ms=processing_time
             )
             
-            # Add recipients
             for recipient in metadata['recipients']:
                 recipient_obj = EmailRecipient(
                     email_address=recipient,
@@ -65,7 +64,6 @@ class EmailRepository:
                 )
                 email_log.recipients.append(recipient_obj)
             
-            # Add attachments
             for filename, file_path in attachment_data:
                 attachment_obj = EmailAttachment(
                     filename=filename,
@@ -77,7 +75,6 @@ class EmailRepository:
             db.session.commit()
             logger.info(f"Email saved to database (ID: {email_log.id})")
             
-            # Convert to dict while session context is still open
             email_dict = email_log.to_dict()
             email_log._email_dict = email_dict
             
@@ -142,7 +139,6 @@ class EmailRepository:
         if has_app_context():
             return None
         
-        # Use the Flask app instance if provided, otherwise create a new one
         if self.flask_app:
             ctx = self.flask_app.app_context()
             ctx.push()

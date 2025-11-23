@@ -11,7 +11,7 @@ from ...engines import DetectionEngine, ContentExtractor, PolicyEngine
 from ..storage import AttachmentStorage
 from ..database import EmailRepository
 from ..smtp import SMTPForwarder
-from ..websocket import WebSocketNotifier
+from ..notifications import EmailNotifier
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class EmailProcessor(Message):
         self.attachment_storage = AttachmentStorage()
         self.email_repository = EmailRepository(flask_app=flask_app)
         self.smtp_forwarder = SMTPForwarder()
-        self.websocket_notifier = WebSocketNotifier()
+        self.email_notifier = EmailNotifier()
     
     def handle_message(self, message: EmailMessage):
         """Process intercepted email (synchronous aiosmtpd handler)."""
@@ -41,12 +41,10 @@ class EmailProcessor(Message):
             body_text = self._extract_body_text(message)
             attachment_texts, attachment_data, attachment_count = self._process_attachments(message)
             
-            # Combine all text for detection
             all_text = body_text
             if attachment_texts:
                 all_text += "\n\n" + "\n\n".join(attachment_texts)
             
-            # Run detection
             detections = self.detection_engine.detect_patterns(
                 all_text,
                 min_confidence=Config.MIN_CONFIDENCE
@@ -54,11 +52,9 @@ class EmailProcessor(Message):
             
             self._print_detection_results(detections)
             
-            # Apply policy
             policy_decision = self.policy_engine.evaluate(detections, message)
             self._print_policy_decision(policy_decision)
             
-            # Save to database
             processing_time = (time.time() - start_time) * 1000
             email_log = self.email_repository.save(
                 metadata, body_text, detections, policy_decision,
@@ -66,9 +62,8 @@ class EmailProcessor(Message):
             )
             
             if email_log:
-                self.websocket_notifier.notify_new_email(email_log)
+                self.email_notifier.notify_new_email(email_log)
             
-            # Handle based on policy decision
             message_to_send = self._get_message_to_send(policy_decision, message)
             if message_to_send:
                 self.smtp_forwarder.forward(message_to_send)
@@ -77,7 +72,7 @@ class EmailProcessor(Message):
             logger.error(f"Error processing email: {e}", exc_info=True)
             error_log = self.email_repository.save_error(message, e, start_time)
             if error_log:
-                self.websocket_notifier.notify_new_email(error_log)
+                self.email_notifier.notify_new_email(error_log)
     
     def _extract_metadata(self, message: EmailMessage) -> dict:
         """Extract metadata from email message."""
@@ -115,11 +110,9 @@ class EmailProcessor(Message):
                 if not payload:
                     continue
                 
-                # Save attachment
                 file_path = self.attachment_storage.save(filename, payload)
                 if file_path:
                     attachment_data.append((filename, file_path))
-                    # Extract text from attachment
                     text = self._extract_attachment_text(file_path, filename)
                     if text:
                         attachment_texts.append(text)
@@ -129,7 +122,6 @@ class EmailProcessor(Message):
     def _extract_attachment_text(self, file_path: str, filename: str) -> str:
         """Extract text content from attachment."""
         try:
-            # Check if it's an archive
             if zipfile.is_zipfile(file_path) or tarfile.is_tarfile(file_path):
                 extracted = self.content_extractor.extract_from_archive(
                     file_path, 

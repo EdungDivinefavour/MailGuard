@@ -5,43 +5,117 @@ This document describes the project structure.
 ## Directory Layout
 
 ```
-email_interceptor/
-├── mailguard-server/      # Server-side code (Python)
-│   ├── mailguard/         # MailGuard package
-│   │   ├── config.py      # Configuration
-│   │   ├── engines/       # Detection, extraction, policy engines
-│   │   ├── models/        # Database models
-│   │   └── proxy/         # SMTP proxy server
-│   ├── app.py             # Flask API server
-│   ├── main.py            # Main entry point (starts proxy + Flask)
-│   ├── requirements.txt   # Python dependencies
-│   ├── Dockerfile         # Docker image definition
-│   ├── test_email.py      # Test script
-│   ├── instance/          # Database files (mounted as volume)
-│   ├── attachments/       # Stored email attachments (mounted as volume)
-│   ├── quarantine/        # Quarantined emails (mounted as volume)
-│   └── test_emails/       # Test email files
+mailguard/
+├── mailguard-server/              # Server-side code (Python)
+│   ├── mailguard/                 # MailGuard package
+│   │   ├── __init__.py
+│   │   ├── config.py              # Configuration settings
+│   │   ├── api/                   # Flask API
+│   │   │   ├── __init__.py
+│   │   │   ├── app.py             # Flask app factory
+│   │   │   └── routes/            # API route handlers
+│   │   │       ├── __init__.py
+│   │   │       ├── emails.py      # Email endpoints
+│   │   │       ├── attachments.py # Attachment endpoints
+│   │   │       ├── events.py      # SSE event streaming
+│   │   │       └── stats.py       # Statistics endpoints
+│   │   ├── engines/               # Processing engines
+│   │   │   ├── __init__.py
+│   │   │   ├── content_extractor.py  # Tika content extraction
+│   │   │   ├── detection/         # Detection engine
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── engine.py      # Main detection engine
+│   │   │   │   └── detectors/     # Detection implementations
+│   │   │   │       ├── __init__.py
+│   │   │   │       ├── presidio_detector.py  # ML-based Presidio
+│   │   │   │       └── regex_detector.py     # Regex patterns
+│   │   │   └── policy/            # Policy enforcement
+│   │   │       ├── __init__.py
+│   │   │       └── engine.py      # Policy decision engine
+│   │   ├── models/                # Database models
+│   │   │   ├── __init__.py
+│   │   │   ├── email.py           # EmailLog model
+│   │   │   ├── attachment.py      # EmailAttachment model
+│   │   │   ├── recipient.py       # EmailRecipient model
+│   │   │   ├── detection_result.py # DetectionResult dataclass
+│   │   │   └── policy_decision.py  # PolicyDecision dataclass
+│   │   ├── proxy/                 # SMTP proxy server
+│   │   │   ├── __init__.py
+│   │   │   └── smtp_proxy.py      # SMTP proxy controller
+│   │   └── services/              # Business logic services
+│   │       ├── __init__.py
+│   │       ├── database/          # Database operations
+│   │       │   ├── __init__.py
+│   │       │   └── repository.py  # Email repository
+│   │       ├── email/             # Email processing
+│   │       │   ├── __init__.py
+│   │       │   └── processor.py   # Email processor
+│   │       ├── notifications/     # Event notifications
+│   │       │   ├── __init__.py
+│   │       │   └── notifier.py    # SSE notifier
+│   │       ├── smtp/              # SMTP operations
+│   │       │   ├── __init__.py
+│   │       │   └── forwarder.py   # SMTP forwarder
+│   │       └── storage/           # File storage
+│   │           ├── __init__.py
+│   │           ├── attachment.py  # Attachment storage
+│   │           └── quarantine.py  # Quarantine storage
+│   ├── app.py                     # Legacy Flask app (deprecated)
+│   ├── main.py                    # Main entry point (starts proxy + Flask)
+│   ├── requirements.txt           # Python dependencies
+│   ├── Dockerfile                 # Docker image definition
+│   ├── scripts/                   # Utility scripts
+│   │   ├── test_email.py          # Email testing script
+│   │   └── fixtures/              # Test email fixtures
+│   │       ├── README.md
+│   │       └── *.txt              # Test email files
+│   ├── instance/                  # Database files (mounted as volume)
+│   │   └── mailguard.db           # SQLite database
+│   ├── attachments/               # Stored email attachments (mounted as volume)
+│   └── quarantine/                # Quarantined emails (mounted as volume)
 │
-├── mailguard-client/       # MailGuard Dashboard (React)
+├── mailguard-client/              # MailGuard Dashboard (React)
 │   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── App.jsx        # Main app
-│   │   └── main.jsx       # Entry point
-│   ├── Dockerfile         # Docker image definition
+│   │   ├── components/            # React components
+│   │   │   ├── EmailTable.jsx     # Email list table
+│   │   │   ├── Filters.jsx        # Filter controls
+│   │   │   ├── Header.jsx         # Dashboard header
+│   │   │   └── StatsGrid.jsx      # Statistics display
+│   │   ├── App.jsx                # Main app component
+│   │   ├── main.jsx               # Entry point
+│   │   └── index.css              # Global styles
+│   ├── index.html                 # HTML template
+│   ├── Dockerfile                 # Docker image definition
 │   ├── package.json
 │   └── vite.config.js
 │
-├── smtp-client/           # Email Client Application (React)
+├── smtp-client/                   # Email Client Application (React)
 │   ├── src/
-│   │   ├── components/    # Email client components
-│   │   ├── App.jsx        # Main app
-│   │   └── main.jsx       # Entry point
-│   ├── Dockerfile         # Docker image definition
+│   │   ├── components/            # Email client components
+│   │   │   ├── ComposeEmail.jsx   # Email composer
+│   │   │   ├── ComposeEmail.css
+│   │   │   ├── EmailList.jsx      # Email inbox list
+│   │   │   ├── EmailList.css
+│   │   │   ├── EmailView.jsx      # Email detail view
+│   │   │   ├── EmailView.css
+│   │   │   ├── Sidebar.jsx        # Navigation sidebar
+│   │   │   ├── Sidebar.css
+│   │   │   ├── Toast.jsx          # Toast notifications
+│   │   │   └── Toast.css
+│   │   ├── App.jsx                # Main app component
+│   │   ├── App.css                # App styles
+│   │   ├── main.jsx               # Entry point
+│   │   ├── index.css              # Global styles
+│   │   └── config.js              # Configuration
+│   ├── index.html                 # HTML template
+│   ├── Dockerfile                 # Docker image definition
 │   ├── package.json
 │   └── vite.config.js
 │
-├── docker-compose.yml     # Docker Compose orchestration (all services)
-└── .dockerignore          # Files to exclude from Docker builds
+├── docker-compose.yml             # Docker Compose orchestration (all services)
+├── README.md                      # Main project documentation
+├── PROJECT_STRUCTURE.md           # This file
+└── TROUBLESHOOTING.md             # Troubleshooting guide
 ```
 
 ## Applications
@@ -108,17 +182,31 @@ docker-compose logs -f
 docker-compose up
 ```
 
+No need to rebuild if you haven't changed anything.
+
 ## API Endpoints
 
 All endpoints are prefixed with `/api`:
 
+**Email Endpoints:**
 - `GET /api/emails` - Get email logs (with pagination/filters)
 - `GET /api/emails/<id>` - Get specific email details
-- `GET /api/stats` - Get statistics
-- `POST /api/send-email` - Send email via SMTP proxy
+
+**Statistics Endpoints:**
+- `GET /api/stats` - Get statistics about intercepted emails
+- `GET /api/stats/sse-clients` - Get count of connected SSE clients
+- `POST /api/stats/test-sse` - Test endpoint to manually trigger SSE event
+
+**Event Streaming:**
+- `GET /api/events/stream` - Server-Sent Events stream for real-time updates
+
+**Attachment Endpoints:**
 - `GET /api/attachments/<id>/download` - Download email attachment
 
-## WebSocket Events
+**Email Sending:**
+- `POST /api/send-email` - Send email via SMTP proxy
+
+## Server-Sent Events (SSE)
 
 - `new_email` - Emitted when a new email is processed (real-time updates)
 

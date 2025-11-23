@@ -135,7 +135,7 @@ Want to test if it's working? You can use the built-in test script:
 docker-compose exec mailguard-server python test_email.py
 ```
 
-This lets you send test emails with different types of sensitive data to see how MailGuard handles them.
+You can send test emails with different types of sensitive data to see how MailGuard handles them.
 
 ## What Gets Detected?
 
@@ -156,7 +156,7 @@ MailGuard can detect:
 - **Locations** - Geographic locations
 - **Dates and times** - Sensitive date/time information
 
-The ML models provide confidence scores for each detection, allowing you to filter false positives.
+Each detection comes with a confidence score, so you can filter out false positives.
 
 ## Troubleshooting
 
@@ -172,18 +172,13 @@ Make sure Docker is running! On Mac/Windows, you need Docker Desktop to be open.
 
 ### Can't Access the Web Pages
 
-Wait a minute or two after starting - the services need time to boot up. Check the logs with `docker-compose logs -f` to see if there are any errors.
+Give it a minute or two to boot up. Check the logs with `docker-compose logs -f` if something's not working.
 
 ### Presidio/ML Detection Not Working
 
-If you see warnings about Presidio or spaCy models not being found:
-1. The Docker image should automatically download the required spaCy model (`en_core_web_sm`) during build
-2. If it fails, you can manually install it by running:
-   ```bash
-   docker-compose exec mailguard-server python -m spacy download en_core_web_sm
-   ```
-3. If Presidio fails to initialize, the system will automatically fall back to regex-based detection
-4. Check the logs with `docker-compose logs -f mailguard-server` to see what's happening
+If you see warnings about Presidio not working:
+1. If Presidio fails to initialize, the system will automatically fall back to regex-based detection
+2. Check the logs with `docker-compose logs -f mailguard-server` to see what's happening
 
 ### Need to Start Fresh
 

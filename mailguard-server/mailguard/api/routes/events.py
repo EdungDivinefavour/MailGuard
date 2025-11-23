@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('events', __name__, url_prefix='/api/events')
 
-# Dictionary mapping client_id to their event queue
 _client_queues = {}
 _clients_lock = threading.Lock()
 
@@ -34,7 +33,7 @@ def stream_events():
     """Stream events to client using Server-Sent Events."""
     def event_stream():
         client_id = str(uuid.uuid4())
-        client_queue = queue.Queue(maxsize=100)  # Limit queue size to prevent memory issues
+        client_queue = queue.Queue(maxsize=100)
         
         with _clients_lock:
             _client_queues[client_id] = client_queue
@@ -60,7 +59,7 @@ def stream_events():
         mimetype='text/event-stream',
         headers={
             'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no',  # Disable buffering in nginx
+            'X-Accel-Buffering': 'no',
             'Connection': 'keep-alive'
         }
     )

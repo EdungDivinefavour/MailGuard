@@ -46,7 +46,6 @@ class SMTPProxy:
             port=Config.PROXY_PORT
         )
         
-        # Check Tika availability
         if not self.content_extractor.is_tika_available():
             logger.warning("Tika server not available. Attachment extraction may fail.")
             logger.warning("Start Tika with: docker-compose up -d")

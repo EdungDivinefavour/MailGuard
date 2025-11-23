@@ -6,8 +6,8 @@ from ...models import EmailLog
 logger = logging.getLogger(__name__)
 
 
-class WebSocketNotifier:
-    """Handles SSE notifications (kept name for compatibility)."""
+class EmailNotifier:
+    """Handles SSE notifications for new emails."""
     
     def __init__(self, flask_app=None):
         pass

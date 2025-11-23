@@ -25,7 +25,6 @@ class PolicyEngine:
         self.quarantine_dir = quarantine_dir or Path("./quarantine")
         self.quarantine_dir.mkdir(parents=True, exist_ok=True)
         
-        # Policy rules: pattern_type -> action
         self.policy_rules = {
             'credit_card': 'block',
             'sin': 'block',
@@ -54,24 +53,19 @@ class PolicyEngine:
                 detections=[]
             )
         
-        # Determine action based on detected patterns (simplified)
         action = self.default_policy
         
         for detection in detections:
             pattern_action = self.policy_rules.get(detection.pattern_type, self.default_policy)
             
-            # Block takes priority
             if pattern_action == 'block':
                 action = 'block'
                 break
-            # Otherwise use the pattern's action
             elif action == self.default_policy:
                 action = pattern_action
         
-        # Convert detections to dict for storage
         detection_dicts = [asdict(d) for d in detections]
         
-        # Apply action
         if action == 'block':
             return self._block_message(message, detections, detection_dicts)
         elif action == 'quarantine':
@@ -131,7 +125,6 @@ class PolicyEngine:
         """Sanitize sensitive data from message."""
         sanitized = copy.deepcopy(message)
         
-        # Get body text
         body = ""
         if sanitized.is_multipart():
             for part in sanitized.walk():
@@ -147,7 +140,6 @@ class PolicyEngine:
             start, end = detection.position
             sanitized_body = sanitized_body[:start] + f"[REDACTED {detection.pattern_type.upper()}]" + sanitized_body[end:]
         
-        # Update message body
         if sanitized.is_multipart():
             for part in sanitized.walk():
                 if part.get_content_type() == "text/plain":
@@ -156,7 +148,6 @@ class PolicyEngine:
         else:
             sanitized.set_payload(sanitized_body)
         
-        # Add warning header
         sanitized['X-Content-Sanitized'] = 'true'
         sanitized['X-Sanitization-Reason'] = f"{len(detections)} sensitive pattern(s) detected"
         
@@ -177,13 +168,11 @@ class PolicyEngine:
         """Tag message with warning headers."""
         tagged = copy.deepcopy(message)
         
-        # Add warning headers
         detection_types = list(set(d.pattern_type for d in detections))
         tagged['X-Sensitive-Data-Detected'] = 'true'
         tagged['X-Detection-Types'] = ', '.join(detection_types)
         tagged['X-Detection-Count'] = str(len(detections))
         
-        # Optionally modify subject
         original_subject = tagged.get('Subject', '')
         tagged['Subject'] = f"[SENSITIVE] {original_subject}"
         

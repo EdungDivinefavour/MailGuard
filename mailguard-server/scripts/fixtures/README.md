@@ -1,6 +1,6 @@
 # Test Email Samples
 
-Sample emails for testing different scenarios with MailGuard.
+Here are some sample emails you can use to test different scenarios with MailGuard.
 
 ## Email Files
 
@@ -49,5 +49,5 @@ Use these to verify everything works:
 
 ## Notes
 
-All the sensitive data in these files is fake - just for testing. Credit cards aren't valid, SIN/SSN numbers are made up. Feel free to modify them for your own tests.
+All the sensitive data in these files is fake - just for testing. The credit cards aren't valid, and the SIN/SSN numbers are made up. Feel free to modify them for your own tests.
 
