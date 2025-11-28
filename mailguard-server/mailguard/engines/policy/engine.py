@@ -25,14 +25,7 @@ class PolicyEngine:
         self.quarantine_dir = quarantine_dir or Path("./quarantine")
         self.quarantine_dir.mkdir(parents=True, exist_ok=True)
         
-        self.policy_rules = {
-            'credit_card': 'block',
-            'sin': 'block',
-            'ssn': 'block',
-            'email': 'tag',
-            'ner_person': 'tag',
-            'ner_org': 'tag',
-        }
+        self.quarantine_dir.mkdir(parents=True, exist_ok=True)
     
     def evaluate(self, detections: List[DetectionResult], 
                  message: EmailMessage) -> PolicyDecision:
@@ -53,16 +46,8 @@ class PolicyEngine:
                 detections=[]
             )
         
+        # Always use default policy since we have no specific rules
         action = self.default_policy
-        
-        for detection in detections:
-            pattern_action = self.policy_rules.get(detection.pattern_type, self.default_policy)
-            
-            if pattern_action == 'block':
-                action = 'block'
-                break
-            elif action == self.default_policy:
-                action = pattern_action
         
         detection_dicts = [asdict(d) for d in detections]
         
