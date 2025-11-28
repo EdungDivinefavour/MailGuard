@@ -44,6 +44,16 @@ class EmailRepository:
         try:
             ctx = self._get_flask_context()
             
+            # Determine proper status based on policy action and detections
+            if policy_decision.action == 'block':
+                status = 'blocked'
+            elif policy_decision.action == 'quarantine':
+                status = 'quarantined'
+            elif len(detections) > 0:
+                status = 'flagged'
+            else:
+                status = 'processed'
+            
             email_log = EmailLog(
                 message_id=metadata['message_id'],
                 sender=metadata['sender'],
@@ -53,7 +63,7 @@ class EmailRepository:
                 detection_results=[d.__dict__ for d in detections] if detections else None,
                 body_text=body_text[:10000],  # Limit size
                 attachment_count=attachment_count,
-                status='processed' if policy_decision.action != 'block' else 'blocked',
+                status=status,
                 processing_time_ms=processing_time
             )
             

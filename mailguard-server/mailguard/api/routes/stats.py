@@ -13,7 +13,7 @@ bp = Blueprint('stats', __name__, url_prefix='/api/stats')
 def get_stats():
     """Get stats about intercepted emails."""
     total = EmailLog.query.count()
-    flagged = EmailLog.query.filter(EmailLog.flagged == True).count()
+    flagged = EmailLog.query.filter(EmailLog.status == 'flagged').count()
     blocked = EmailLog.query.filter(EmailLog.status == 'blocked').count()
     quarantined = EmailLog.query.filter(EmailLog.status == 'quarantined').count()
     

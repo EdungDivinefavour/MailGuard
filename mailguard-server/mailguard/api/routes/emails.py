@@ -24,6 +24,11 @@ def get_emails():
             joinedload(EmailLog.attachments)
         )
         
+        # Filter based on client view
+        view_mode = request.args.get('view', 'admin')
+        if view_mode == 'smtp_client':
+            query = query.filter(EmailLog.status != 'blocked')
+            
         if flagged_only:
             query = query.filter(EmailLog.flagged == True)
         

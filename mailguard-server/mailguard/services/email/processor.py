@@ -154,8 +154,8 @@ class EmailProcessor(Message):
             logger.warning(f"Email blocked: {policy_decision.reason}")
             return None
         elif policy_decision.action == 'quarantine':
-            logger.info(f"Email quarantined: {policy_decision.reason}")
-            return policy_decision.original_message
+            logger.warning(f"Email quarantined: {policy_decision.reason}")
+            return None  # Don't forward quarantined emails
         elif policy_decision.action == 'sanitize':
             logger.info(f"Email sanitized: {policy_decision.reason}")
             return policy_decision.modified_message

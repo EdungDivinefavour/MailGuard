@@ -38,6 +38,7 @@ function App() {
         page: currentPage,
         per_page: 50,
         flagged: flaggedOnly,
+        view: 'admin',
         ...(statusFilter && { status: statusFilter })
       })
 

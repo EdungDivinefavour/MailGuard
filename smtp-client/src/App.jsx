@@ -79,6 +79,10 @@ function App() {
       try {
         const data = JSON.parse(event.data)
         if (data.type === 'new_email' && data.data) {
+          // Filter out blocked emails for this client
+          if (data.data.status === 'blocked') {
+            return
+          }
           handleNewEmail(data.data)
         }
       } catch (error) {
@@ -100,7 +104,7 @@ function App() {
     try {
       // Use relative path if API_URL is empty (will go through Vite proxy)
       // Otherwise use the full URL
-      const apiPath = API_URL ? `${API_URL}/api/emails?per_page=100` : '/api/emails?per_page=100'
+      const apiPath = API_URL ? `${API_URL}/api/emails?per_page=100&view=smtp_client` : '/api/emails?per_page=100&view=smtp_client'
       const response = await fetch(apiPath)
 
       if (!response.ok) {

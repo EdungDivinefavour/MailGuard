@@ -7,6 +7,7 @@ function EmailTable({ emails, loading, error, currentPage, totalPages, onPageCha
   const getBadgeClass = (status, policy) => {
     if (status === 'blocked') return 'blocked'
     if (status === 'quarantined') return 'quarantined'
+    if (status === 'flagged') return 'flagged'
     if (policy === 'sanitize') return 'sanitized'
     if (policy === 'tag') return 'tagged'
     if (policy === 'block') return 'blocked'
